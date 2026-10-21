@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 256px; height: 256px; background: transparent; }
+  .tile {
+    position: absolute; inset: 8px; border-radius: 52px; overflow: hidden;
+    background: linear-gradient(145deg, #16212e 0%, #0b121a 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile svg { width: 150px; height: 150px; color: {{accent}}; }
+  .stripe { position: absolute; left: 0; right: 0; bottom: 0; height: 10px; display: flex; }
+  .stripe span { flex: 1; }
+</style>
+</head>
+<body>
+  <div class="tile">
+    {{glyph}}
+    <div class="stripe"><span style="background:#23c7b4"></span><span style="background:#f26b66"></span><span style="background:#f8c33c"></span><span style="background:#5f77a8"></span></div>
+  </div>
+</body>
+</html>

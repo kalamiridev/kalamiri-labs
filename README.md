@@ -12,6 +12,20 @@ Docker service that reads Huawei FusionSolar plant data and publishes it to MQTT
 
 [`integrations/fusionsolar-mqtt`](./integrations/fusionsolar-mqtt/)
 
+### Odoo modules
+
+Modules for Odoo 19 (Community and Enterprise), mostly for Croatian companies. Each module has a README
+in Croatian with setup and usage. License: AGPL-3.
+
+**To install the modules**, use the released versions in
+**[odoo-croatia](https://github.com/kalamiridev/odoo-croatia)** (branch `19.0`) or the Odoo Apps Store. This folder is
+where they are developed; release tools are in [`odoo/tools`](./odoo/tools/).
+
+| Module | Description |
+|---|---|
+| [`l10n_hr_price_list`](./odoo/l10n_hr_price_list/) | Public price lists for consumers (CSV, per premises, with the additional price, NN 101/26), with an optional webhook |
+| [`l10n_hr_price_list_stock`](./odoo/l10n_hr_price_list_stock/) | Availability in the public price list from the warehouse of each premises (installed automatically with Inventory) |
+
 ## Licensing
 
 Projects in this repository may use different open-source licenses.  

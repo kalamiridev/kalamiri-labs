@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  html, body { margin: 0; width: 560px; height: 280px; }
+  body {
+    background: linear-gradient(135deg, #16212e 0%, #0b121a 70%);
+    color: #e6edf7; font-family: "Arial Nova", Arial, sans-serif; position: relative; overflow: hidden;
+  }
+  .text { position: absolute; left: 34px; top: 30px; width: 330px; }
+  .brand { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #c2cfdf; }
+  h1 { margin: 10px 0 6px; font-size: 27px; line-height: 1.15; color: #ffffff; }
+  .subtitle { font-size: 14px; color: {{accent}}; font-weight: bold; }
+  ul { margin: 16px 0 0; padding: 0; list-style: none; font-size: 13px; line-height: 1.75; color: #e6edf7; }
+  li::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: {{accent}}; margin-right: 9px; }
+  .glyph { position: absolute; right: 30px; top: 48px; width: 170px; height: 170px; color: {{accent}}; opacity: .95; }
+  .glyph svg { width: 100%; height: 100%; }
+  .stripe { position: absolute; left: 0; right: 0; bottom: 0; height: 6px; display: flex; }
+  .stripe span { flex: 1; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <div class="brand">Kalamiri · Odoo 19</div>
+    <h1>{{title}}</h1>
+    <div class="subtitle">{{subtitle}}</div>
+    <ul>{{points}}</ul>
+  </div>
+  <div class="glyph">{{glyph}}</div>
+  <div class="stripe"><span style="background:#23c7b4"></span><span style="background:#f26b66"></span><span style="background:#f8c33c"></span><span style="background:#5f77a8"></span></div>
+</body>
+</html>

@@ -20,3 +20,11 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code (internal notes, not public)
+CLAUDE.md
+CLAUDE.local.md
+
+# Certificates (fiscalization .p12 files must never be committed)
+*.p12
+*.pfx

@@ -1,0 +1,25 @@
+{
+  "l10n_hr_price_list": {
+    "title": "Public Price List for Consumers",
+    "subtitle": "Croatia · NN 101/26",
+    "glyph": "price_list",
+    "accent": "#f8c33c",
+    "points": [
+      "CSV price list per premises",
+      "Additional (anchor) price with its date",
+      "Special sales from pricelist rules",
+      "Public link, archive and webhook"
+    ]
+  },
+  "l10n_hr_price_list_stock": {
+    "title": "Public Price List: Stock per Premises",
+    "subtitle": "Croatia · NN 101/26",
+    "glyph": "price_list_stock",
+    "accent": "#23c7b4",
+    "points": [
+      "Availability from the premises warehouse",
+      "Installed with Inventory",
+      "Nothing to set up with one warehouse"
+    ]
+  }
+}
