@@ -9,7 +9,9 @@ module in Odoo Apps) and screenshots.
   `banner.html`, a glyph in `glyphs/` and the texts in `modules.json`. For a new module add it to `modules.json`
   (and a glyph), then `python render.py <module>`.
 - `screenshots.py <spec.json>` logs in to an Odoo test database and saves screenshots of its pages. Use a test
-  database and hide internal data (addresses, notes, names) with the `script` of a shot.
+  database and hide internal data (addresses, notes, names) with the `script` of a shot. Changes the script makes
+  to form fields are discarded after each shot (Odoo would save them when the page is left); check the record
+  afterwards anyway.
 
 Both need Microsoft Edge and the Python package `websocket-client`.
 
@@ -25,4 +27,5 @@ python publish.py ../../../odoo-croatia l10n_hr_price_list l10n_hr_price_list_st
 
 It checks that each module is committed and has a README, LICENSE, icon and description page, copies it without
 internal notes (`CLAUDE.md`) and caches, updates the module list in the README of the release repository and commits
-there with the source commit. Push the release repository yourself after a clean install test.
+there with the source commit. First put the module on `main` of kalamiri-labs (so the source commit is public),
+then release it, run a clean install test from the release repository and push it.

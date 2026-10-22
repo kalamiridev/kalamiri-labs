@@ -42,6 +42,9 @@ def main():
             out = ADDONS / shot["module"] / "static" / "description" / shot["file"]
             data = browser.call("Page.captureScreenshot", format="png", clip={"x": 0, "y": 0, "width": width, "height": height, "scale": 1})
             out.write_bytes(base64.b64decode(data["data"]))
+            # A script may change fields only for the picture: discard them, or Odoo saves them on leaving.
+            browser.call("Runtime.evaluate", expression="document.querySelector('.o_form_button_cancel')?.click()")
+            time.sleep(1)
             print(out)
     finally:
         browser.close()
