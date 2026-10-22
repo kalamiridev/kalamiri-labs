@@ -18,7 +18,8 @@ Modules for Odoo 19 (Community and Enterprise), mostly for Croatian companies. E
 in Croatian with setup and usage. License: AGPL-3.
 
 **To install the modules**, use the released versions in
-**[odoo-croatia](https://github.com/kalamiridev/odoo-croatia)** (branch `19.0`). This folder is
+**[odoo-croatia](https://github.com/kalamiridev/odoo-croatia)** (branch `19.0`) or the
+[Odoo Apps Store](https://apps.odoo.com/apps/modules/19.0/l10n_hr_price_list). This folder is
 where they are developed; release tools are in [`odoo/tools`](./odoo/tools/).
 
 | Module | Description |
