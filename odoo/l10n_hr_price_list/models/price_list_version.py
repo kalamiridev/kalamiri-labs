@@ -14,29 +14,47 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 TZ = pytz.timezone("Europe/Zagreb")
-# Previous price lists must stay public at least 30 days after their publication.
-KEEP_DAYS = 30
+# A replaced price list stays public at least 15 days (Pravilnik o načinu objave cjenika proizvoda, NN 132/26,
+# article 3(6)).
+KEEP_DAYS = 15
 WEBHOOK_TIMEOUT = 15
 
-# Prescribed content (Ministry of Economy explanation of NN 101/26, point 2.5): the same
-# structure for every premises, product and service columns together.
-COLUMNS = [
-    "sifra",
-    "naziv",
-    "marka",
-    "jedinica_mjere",
-    "maloprodajna_cijena_eur",
-    "cijena_za_jedinicu_mjere_eur",
-    "jedinica_mjere_za_cijenu",
-    "posebni_oblik_prodaje",
-    "naziv_posebnog_oblika_prodaje",
-    "dodatna_cijena_eur",
-    "datum_dodatne_cijene",
-    "barkod",
-    "raspolozivost",
-]
-# Sent on the webhook only (not in the prescribed file): sales price without taxes, e.g. for showing
-# prices to companies on the website.
+# Goods and services are published in separate files (article 6(3)), with the prescribed columns in the
+# prescribed order (article 3(2)-(4)).
+GOODS = "goods"
+SERVICES = "services"
+KINDS = (GOODS, SERVICES)
+# The part of the file name that says which price list it is.
+KIND_FILE_NAME = {GOODS: "ROBA", SERVICES: "USLUGE"}
+# The stable link of the current file of a premises: /cjenik/<label>/<kind>.
+KIND_URL = {GOODS: "roba", SERVICES: "usluge"}
+COLUMNS = {
+    GOODS: [
+        "naziv",
+        "sifra",
+        "marka",
+        "neto_kolicina",
+        "jedinica_mjere",
+        "maloprodajna_cijena_eur",
+        "posebni_oblik_prodaje",
+        "cijena_za_jedinicu_mjere_eur",
+        "barkod",
+        "ean_barkod",
+        "bazna_cijena_eur",
+    ],
+    SERVICES: [
+        "naziv",
+        "maloprodajna_cijena_eur",
+        "posebni_oblik_prodaje",
+        "bazna_cijena_eur",
+    ],
+}
+# Sent on the webhook only (not in the prescribed file): the code also of a service, the name of the special
+# sale, the date of the base price, the sales price without taxes (e.g. for showing prices to companies on the
+# website).
+CODE_COLUMN = "sifra"
+SPECIAL_SALE_NAME_COLUMN = "naziv_posebnog_oblika_prodaje"
+BASE_PRICE_DATE_COLUMN = "datum_bazne_cijene"
 NET_COLUMN = "prodajna_cijena_bez_pdv_eur"
 # Sent on the webhook only, during a special sale: price before the sale and the lowest price in the 30 days
 # before it (to be shown next to the special sale price).
@@ -82,6 +100,10 @@ class L10nHrPriceListVersion(models.Model):
         ondelete="restrict",
     )
     company_id = fields.Many2one(related="location_id.company_id", store=True, index=True)
+    # Empty: a version published before goods and services had separate files (both in one file).
+    kind = fields.Selection(
+        selection=[(GOODS, "Goods"), (SERVICES, "Services")], string="Price List", readonly=True, index=True,
+    )
     number = fields.Integer(string="Storage Number", required=True, readonly=True)
     name = fields.Char(string="File Name", required=True, readonly=True, index=True)
     published_at = fields.Datetime(string="Published", required=True, readonly=True)
@@ -111,13 +133,13 @@ class L10nHrPriceListVersion(models.Model):
         "The storage number of a price list must be unique per premises.",
     )
 
-    @api.depends("number", "location_id")
+    @api.depends("number", "location_id", "kind")
     def _compute_is_current(self):
-        latest = dict(self.sudo()._read_group(
-            [("location_id", "in", self.location_id.ids)], ["location_id"], ["number:max"],
-        ))
+        current = self.browse()
+        for location in self.sudo().location_id:
+            current |= location._current_versions()
         for version in self:
-            version.is_current = latest.get(version.location_id) == version.number
+            version.is_current = version in current
 
     @api.depends("name")
     def _compute_url(self):
@@ -125,15 +147,26 @@ class L10nHrPriceListVersion(models.Model):
         for version in self:
             version.url = f"{version.get_base_url()}/cjenik/{quote(version.name)}" if version.name else False
 
+    def _replaced_by(self):
+        """The version that replaced this one: the next one of the same price list (any next one for a
+        version that had goods and services in one file)."""
+        self.ensure_one()
+        domain = [("location_id", "=", self.location_id.id), ("number", ">", self.number)]
+        if self.kind:
+            domain.append(("kind", "=", self.kind))
+        return self.sudo().search(domain, order="number", limit=1)
+
     @api.ondelete(at_uninstall=False)
     def _unlink_except_recent(self):
         limit = fields.Datetime.now() - timedelta(days=KEEP_DAYS)
-        if any(version.published_at > limit for version in self):
-            raise UserError(_(
-                "A price list must stay public at least %(days)s days after it was published. "
-                "Delete only older versions.",
-                days=KEEP_DAYS,
-            ))
+        for version in self:
+            replaced_by = version._replaced_by()
+            if not replaced_by or replaced_by.published_at > limit:
+                raise UserError(_(
+                    "A price list stays public while it is current and %(days)s days after it was replaced. "
+                    "Delete only older versions.",
+                    days=KEEP_DAYS,
+                ))
 
     @api.model
     def _cron_publish(self):
@@ -176,10 +209,12 @@ class L10nHrPriceListVersion(models.Model):
             "company_vat": self.company_id.vat or "",
             "premises": self.location_id.name,
             "premises_label": self.location_id.object_code,
+            "kind": self.kind or "",
             "number": self.number,
             "file_name": self.name,
             "published_at": local_time(self.published_at).isoformat(),
             "url": self.url,
+            "current_url": self.location_id._current_url(self.kind) if self.kind else self.url,
             "content_type": "text/csv; charset=utf-8",
             "content_base64": self.file.decode(),
             "rows": public_rows(json.loads(self.rows_json)) if self.rows_json else [],

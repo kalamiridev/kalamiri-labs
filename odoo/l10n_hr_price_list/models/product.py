@@ -1,10 +1,10 @@
 from odoo import api, fields, models
 
 # Changes that can change a line of the public price list: checked right away
-# (stock and pricelist rules with a period are checked by the morning cron).
+# (pricelist rules with a period are checked by the morning cron).
 PRICE_LIST_FIELDS = {
     "name", "default_code", "barcode", "list_price", "lst_price", "taxes_id", "categ_id", "sale_ok",
-    "active", "type", "uom_id", "is_storable", "company_id", "price_list_brand",
+    "active", "type", "uom_id", "company_id", "price_list_brand", "base_unit_count", "base_unit_id",
 }
 
 
@@ -16,7 +16,7 @@ class ProductTemplate(models.Model):
         string="In Public Price List", compute="_compute_price_list_published",
     )
     price_list_anchor_ids = fields.One2many(
-        "l10n_hr.price.list.anchor", "product_tmpl_id", string="Additional Prices",
+        "l10n_hr.price.list.anchor", "product_tmpl_id", string="Base Prices",
     )
     price_list_can_edit_anchor = fields.Boolean(compute="_compute_price_list_can_edit_anchor")
 

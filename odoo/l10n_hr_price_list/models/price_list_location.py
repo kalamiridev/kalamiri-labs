@@ -13,9 +13,12 @@ from urllib.parse import quote
 from odoo import _, api, fields, models
 from odoo.exceptions import AccessError, UserError
 
+from odoo.tools.barcode import check_barcode_encoding
+
 from .price_list_version import (
-    COLUMNS, LOWEST_PRICE_COLUMN, NET_COLUMN, PRICE_BEFORE_SALE_COLUMN, PRODUCT_KEY, format_amount, format_date,
-    local_now, local_time, parse_amount, public_rows,
+    BASE_PRICE_DATE_COLUMN, CODE_COLUMN, COLUMNS, GOODS, KIND_FILE_NAME, KIND_URL, KINDS, LOWEST_PRICE_COLUMN,
+    NET_COLUMN, PRICE_BEFORE_SALE_COLUMN, PRODUCT_KEY, SERVICES, SPECIAL_SALE_NAME_COLUMN, format_amount,
+    format_date, local_now, local_time, parse_amount, public_rows,
 )
 
 # The lowest price before a special sale is looked up in these days before it.
@@ -36,6 +39,15 @@ def file_name_part(value):
     return re.sub(r"\s+", " ", re.sub(r"[_/\\]+", "-", value or "")).strip()
 
 
+def format_quantity(value):
+    """1,5 or 2 (no trailing zeros)."""
+    return f"{value:g}".replace(".", ",")
+
+
+# The premises part of the file name of a price list that applies at all premises (article 6(4)).
+ALL_PREMISES = "ZA_SVA_PRODAJNA_MJESTA"
+
+
 class L10nHrPriceListLocation(models.Model):
     _name = "l10n_hr.price.list.location"
     _description = "Price List Premises"
@@ -46,21 +58,25 @@ class L10nHrPriceListLocation(models.Model):
     company_id = fields.Many2one(
         "res.company", string="Company", required=True, index=True, default=lambda self: self.env.company,
     )
+    all_premises = fields.Boolean(
+        string="All Premises",
+        help="The same price list (products and prices) at all your premises: one price list named "
+        "ZA_SVA_PRODAJNA_MJESTA instead of one per premises.",
+    )
     object_type = fields.Char(
         string="Type of Premises",
-        required=True,
-        help="First part of the file name, e.g. prodavaonica, ured, servis, salon or webshop.",
+        help="Part of the file name, e.g. prodavaonica, ured, servis, salon or webshop.",
     )
     address = fields.Char(
         string="Address of Premises",
-        help="Second part of the file name, e.g. Ilica 150 Zagreb. Empty: street and city of the company.",
+        help="Part of the file name, e.g. Ilica 150 Zagreb. Empty: street and city of the company.",
     )
     object_code = fields.Char(
         string="Premises Label",
         required=True,
         default="01",
-        help="Third part of the file name: your label of the premises (e.g. P-01, U-03), or 01 if you have none. "
-        "Also the public link of its price list: /cjenik/<label>.",
+        help="Your label of the premises (e.g. P-01, U-03), or 01 if you have none: part of the file name and of "
+        "the public link of its price list, /cjenik/<label>.",
     )
     category_ids = fields.Many2many(
         "product.category",
@@ -91,10 +107,10 @@ class L10nHrPriceListLocation(models.Model):
         "Each premises needs its own label.",
     )
 
-    @api.depends("object_type", "address", "object_code", "company_id.street", "company_id.city")
+    @api.depends("all_premises", "object_type", "address", "object_code", "company_id.street", "company_id.city")
     def _compute_name(self):
         for location in self:
-            location.name = location._file_prefix()
+            location.name = location._premises_name()
 
     @api.depends("version_ids")
     def _compute_version_count(self):
@@ -112,21 +128,41 @@ class L10nHrPriceListLocation(models.Model):
         company = self.company_id
         return self.address or " ".join(part for part in (company.street, company.city) if part)
 
-    def _file_prefix(self):
-        """oblik objekta_adresa objekta_oznaka objekta (Ministry of Economy, point 2.4)."""
+    def _premises_name(self):
+        """The premises in the file name: type_address_label, or ZA_SVA_PRODAJNA_MJESTA (Pravilnik o načinu
+        objave cjenika proizvoda, NN 132/26, article 6(3) and (4))."""
         self.ensure_one()
+        if self.all_premises:
+            return ALL_PREMISES
         return "_".join(file_name_part(part) for part in (self.object_type, self._address(), self.object_code))
+
+    def _trader_id(self):
+        """OIB of a company, or the registration number of a natural person (craft), as in the file name."""
+        self.ensure_one()
+        company = self.company_id
+        if company.price_list_natural_person:
+            return file_name_part(company.company_registry)
+        return re.sub(r"\D", "", company.vat or "")
+
+    def _file_name(self, kind, number):
+        """OIB_premises_ROBA|USLUGE_storage number_GGGGMMDD_SSMM.csv (article 6(3) and (4))."""
+        self.ensure_one()
+        return f"{self._trader_id()}_{self._premises_name()}_{KIND_FILE_NAME[kind]}_{number:03d}_{local_now():%Y%m%d_%H%M}.csv"
 
     def _problem(self):
         """What is missing for a price list, or False."""
         self.ensure_one()
-        missing = [
-            label for label, value in (
+        if self.company_id.price_list_natural_person:
+            trader = (_("Company Registry of the company"), self._trader_id())
+        else:
+            trader = (_("Tax ID (OIB) of the company"), self._trader_id())
+        parts = [trader, (_("Premises Label"), file_name_part(self.object_code))]
+        if not self.all_premises:
+            parts += [
                 (_("Type of Premises"), file_name_part(self.object_type)),
                 (_("Address of Premises"), file_name_part(self._address())),
-                (_("Premises Label"), file_name_part(self.object_code)),
-            ) if not value
-        ]
+            ]
+        missing = [label for label, value in parts if not value]
         if missing:
             return _("The public price list %(premises)s needs: %(fields)s.", premises=self.name, fields=", ".join(missing))
         return False
@@ -142,9 +178,7 @@ class L10nHrPriceListLocation(models.Model):
         if vals.get("webhook_url"):
             # The website gets the current version when the webhook is set.
             for location in self.sudo():
-                current = location._current_version()
-                if current.webhook_state == "none":
-                    current.webhook_state = "pending"
+                location._current_versions().filtered(lambda v: v.webhook_state == "none").webhook_state = "pending"
         self.env["l10n_hr.price.list.version"]._trigger_publish()
         return result
 
@@ -161,9 +195,26 @@ class L10nHrPriceListLocation(models.Model):
             return "hr_HR"
         return self.company_id.partner_id.lang or self.env.lang
 
-    def _current_version(self):
+    def _current_version(self, kind):
+        """The current file of the goods or of the services price list."""
         self.ensure_one()
-        return self.env["l10n_hr.price.list.version"].sudo().search([("location_id", "=", self.id)], limit=1)
+        return self.env["l10n_hr.price.list.version"].sudo().search(
+            [("location_id", "=", self.id), ("kind", "=", kind)], limit=1,
+        )
+
+    def _current_versions(self):
+        """The current files: of goods and of services; before they were published separately, the last
+        file with both."""
+        self.ensure_one()
+        current = self.env["l10n_hr.price.list.version"].sudo()
+        for kind in KINDS:
+            current |= self._current_version(kind)
+        return current or self._current_version(False)
+
+    def _current_url(self, kind):
+        """The stable link of the current file (article 6(2): a changed price list on the same address)."""
+        self.ensure_one()
+        return f"{self.get_base_url()}/cjenik/{quote(file_name_part(self.object_code))}/{KIND_URL[kind]}"
 
     # ------------------------------------------------------------------
     # Content
@@ -239,52 +290,55 @@ class L10nHrPriceListLocation(models.Model):
             )
         return result
 
-    def _availability(self, product):
-        """dostupno / nedostupno for goods; empty for services. Stock only counts when the
-        Inventory app is installed and the product is tracked (stock of the company; of the
-        warehouse of the premises with l10n_hr_price_list_stock)."""
-        if product.type == "service":
-            return ""
-        if "is_storable" in product._fields and product.is_storable:
-            return "dostupno" if product.qty_available > 0 else "nedostupno"
-        return "dostupno"
+    @api.model
+    def _kind(self, product):
+        return SERVICES if product.type == "service" else GOODS
 
     @api.model
-    def _base_unit(self, product, price):
-        """Price per base unit (e.g. per kg or l) when the product has one (eCommerce)."""
+    def _base_unit(self, product):
+        """(net quantity, its unit) when the product has a price per unit of measure (eCommerce), else
+        (0, None)."""
         if "base_unit_id" in product._fields and product.base_unit_id and product.base_unit_count:
-            return format_amount(price / product.base_unit_count), product.base_unit_id.name
-        return "", ""
+            return product.base_unit_count, product.base_unit_id
+        return 0.0, None
 
     def _row(self, product, price, anchor, special_sale=""):
-        """One line of the price list."""
-        unit_price, base_unit = self._base_unit(product, price)
-        return {
-            "sifra": product.default_code or "",
+        """One line of the price list: the prescribed columns of its kind (article 3(2) and (3)), the
+        code also of a service, the name of the special sale and the date of the base price (sent on the
+        webhook)."""
+        row = {
             "naziv": product.with_context(display_default_code=False).display_name,
-            "marka": product.price_list_brand or "",
-            "jedinica_mjere": product.uom_id.name or "",
+            CODE_COLUMN: product.default_code or "",
             "maloprodajna_cijena_eur": format_amount(price),
-            "cijena_za_jedinicu_mjere_eur": unit_price,
-            "jedinica_mjere_za_cijenu": base_unit,
             "posebni_oblik_prodaje": "da" if special_sale else "ne",
-            "naziv_posebnog_oblika_prodaje": special_sale,
-            "dodatna_cijena_eur": format_amount(anchor.price),
-            "datum_dodatne_cijene": format_date(anchor.date),
-            "barkod": product.barcode or "",
-            "raspolozivost": self._availability(product),
+            "bazna_cijena_eur": format_amount(anchor.price),
+            SPECIAL_SALE_NAME_COLUMN: special_sale,
+            BASE_PRICE_DATE_COLUMN: format_date(anchor.date),
         }
+        if self._kind(product) == GOODS:
+            quantity, unit = self._base_unit(product)
+            barcode = product.barcode or ""
+            ean = bool(barcode) and any(check_barcode_encoding(barcode, encoding) for encoding in ("ean13", "ean8"))
+            row.update({
+                "marka": product.price_list_brand or "",
+                "neto_kolicina": format_quantity(quantity) if unit else "",
+                "jedinica_mjere": unit.name if unit else product.uom_id.name or "",
+                "cijena_za_jedinicu_mjere_eur": format_amount(price / quantity) if unit else "",
+                "barkod": barcode,
+                "ean_barkod": barcode if ean else "",
+            })
+        return row
 
     def _rows(self):
-        """Lines of the price list. A product published here for the first time gets its
-        additional price: its current price, dated today (during a special sale the regular price).
-        Products without a price are left out (their additional price would be 0)."""
+        """{kind: lines of its price list}. A product published here for the first time gets its base
+        price: its current price, dated today (during a special sale the regular price). Products without
+        a price are left out (their base price would be 0)."""
         self.ensure_one()
         currency = self.company_id.currency_id
         products = self._products().with_context(lang=self._lang())
         prices = self._prices(products)
         products = products.filtered(lambda product: not currency.is_zero(prices[product.id].consumer))
-        # Saving the additional prices must not schedule another check of this price list.
+        # Saving the base prices must not schedule another check of this price list.
         Anchor = self.env["l10n_hr.price.list.anchor"].sudo().with_context(l10n_hr_price_list_publishing=True)
         anchors = {anchor.product_id.id: anchor for anchor in Anchor.search([("location_id", "=", self.id)])}
         today = local_now().date()
@@ -293,37 +347,41 @@ class L10nHrPriceListLocation(models.Model):
             for product in products if product.id not in anchors
         ])
         anchors.update({anchor.product_id.id: anchor for anchor in new})
-        on_sale = [product.id for product in products if prices[product.id].special_sale]
-        sale_prices = self._special_sale_prices(products, on_sale) if on_sale else {}
-        rows = []
-        for product in products:
-            price = prices[product.id]
-            row = self._row(product, price.consumer, anchors[product.id], price.special_sale)
-            row[NET_COLUMN] = format_amount(price.net)
-            if product.id in sale_prices:
-                price_before, lowest_price = sale_prices[product.id]
-                row[PRICE_BEFORE_SALE_COLUMN] = format_amount(price_before)
-                row[LOWEST_PRICE_COLUMN] = format_amount(lowest_price)
-            row[PRODUCT_KEY] = product.id
-            rows.append(row)
+        rows = {}
+        for kind in KINDS:
+            kind_products = products.filtered(lambda product: self._kind(product) == kind)
+            on_sale = [product.id for product in kind_products if prices[product.id].special_sale]
+            sale_prices = self._special_sale_prices(kind, kind_products, on_sale) if on_sale else {}
+            rows[kind] = []
+            for product in kind_products:
+                price = prices[product.id]
+                row = self._row(product, price.consumer, anchors[product.id], price.special_sale)
+                row[NET_COLUMN] = format_amount(price.net)
+                if product.id in sale_prices:
+                    price_before, lowest_price = sale_prices[product.id]
+                    row[PRICE_BEFORE_SALE_COLUMN] = format_amount(price_before)
+                    row[LOWEST_PRICE_COLUMN] = format_amount(lowest_price)
+                row[PRODUCT_KEY] = product.id
+                rows[kind].append(row)
         return rows
 
-    def _special_sale_prices(self, products, product_ids):
+    def _special_sale_prices(self, kind, products, product_ids):
         """{product id: (price before its special sale, lowest price in the LOWEST_PRICE_DAYS days before
-        it)} from the price lists published for this premises. The sale began with the oldest of the
-        latest versions in a row that show it on special sale (now, when none does yet)."""
+        it)} from the price lists of this kind published for this premises (and the earlier ones with goods
+        and services in one file). The sale began with the oldest of the latest versions in a row that show
+        it on special sale (now, when none does yet)."""
         self.ensure_one()
         by_code = {product.default_code: product.id for product in products if product.default_code}
         start = dict.fromkeys(product_ids, fields.Datetime.now())
         price_before, prices = {}, defaultdict(list)
         looking, done = set(product_ids), set()
         versions = self.env["l10n_hr.price.list.version"].sudo().search(
-            [("location_id", "=", self.id)], order="published_at desc, id desc",
+            [("location_id", "=", self.id), ("kind", "in", [kind, False])], order="published_at desc, id desc",
         )
         for version in versions:
             rows = {}
             for row in json.loads(version.rows_json or "[]"):
-                product_id = row.get(PRODUCT_KEY) or by_code.get(row.get("sifra"))  # older versions: by code
+                product_id = row.get(PRODUCT_KEY) or by_code.get(row.get(CODE_COLUMN))  # older versions: by code
                 if product_id:
                     rows[product_id] = row
             for product_id in product_ids:
@@ -350,10 +408,12 @@ class L10nHrPriceListLocation(models.Model):
         }
 
     @api.model
-    def _csv(self, rows):
-        """UTF-8 with BOM (opens correctly in Excel), semicolons, decimal comma."""
+    def _csv(self, kind, rows):
+        """UTF-8 with BOM (opens correctly in Excel), semicolons, decimal comma (article 6(6) and (7))."""
         buffer = io.StringIO()
-        writer = csv.DictWriter(buffer, fieldnames=COLUMNS, delimiter=";", lineterminator="\r\n", extrasaction="ignore")
+        writer = csv.DictWriter(
+            buffer, fieldnames=COLUMNS[kind], delimiter=";", lineterminator="\r\n", extrasaction="ignore",
+        )
         writer.writeheader()
         writer.writerows(rows)
         return buffer.getvalue().encode("utf-8-sig")
@@ -363,41 +423,45 @@ class L10nHrPriceListLocation(models.Model):
     # ------------------------------------------------------------------
 
     def _publish(self):
-        """Publish a new version when the rows (also the sales prices sent on the webhook) or the
-        file name changed, and the first time each day also without changes, so there is a file of
-        the day (shops update the price list every day by 08:00; the morning cron runs before).
+        """Publish a new version of the goods and of the services price list when its rows (also the
+        values sent on the webhook) or the trader and premises in its file name changed. A price list is
+        published once it has lines; after that also when none are left.
 
-        :returns: the new version, or an empty recordset when nothing changed today
+        :returns: the new versions (none when nothing changed)
         """
         self.ensure_one()
         problem = self._problem()
         if problem:
             raise UserError(problem)
         location = self.sudo()
-        rows = location._rows()
-        content = location._csv(rows)
-        prefix = location._file_prefix()
-        rows_json = json.dumps(rows, ensure_ascii=False, sort_keys=True)
-        published = json.dumps(public_rows(rows), ensure_ascii=False, sort_keys=True)
-        checksum = hashlib.sha256(prefix.encode() + b"\0" + published.encode()).hexdigest()
-        current = location._current_version()
-        if current.checksum == checksum and local_time(current.published_at).date() == local_now().date():
-            return current.browse()
-        number = current.number + 1
-        name = f"{prefix}_{number:03d}_{local_now():%d.%m.%Y_%H:%M}.csv"
-        version = current.create({
-            "location_id": location.id,
-            "number": number,
-            "name": name,
-            "published_at": fields.Datetime.now(),
-            "file": base64.b64encode(content),
-            "checksum": checksum,
-            "rows_json": rows_json,
-            "line_count": len(rows),
-            "webhook_state": "pending" if location.webhook_url else "none",
-        })
-        _logger.info("Price list %s published for %s", name, location.company_id.name)
-        return version
+        Version = self.env["l10n_hr.price.list.version"].sudo()
+        new = Version
+        premises = f"{location._trader_id()}_{location._premises_name()}"
+        for kind, rows in location._rows().items():
+            current = location._current_version(kind)
+            if not rows and not current:
+                continue
+            published = json.dumps(public_rows(rows), ensure_ascii=False, sort_keys=True)
+            checksum = hashlib.sha256(premises.encode() + b"\0" + published.encode()).hexdigest()
+            if current.checksum == checksum:
+                continue
+            last = Version.search([("location_id", "=", location.id)], order="number desc", limit=1)
+            name = location._file_name(kind, last.number + 1)
+            new |= Version.create({
+                "location_id": location.id,
+                "kind": kind,
+                "number": last.number + 1,
+                "name": name,
+                "published_at": fields.Datetime.now(),
+                "file": base64.b64encode(location._csv(kind, rows)),
+                "checksum": checksum,
+                "rows_json": json.dumps(rows, ensure_ascii=False, sort_keys=True),
+                "line_count": len(rows),
+                "webhook_state": "pending" if location.webhook_url else "none",
+            })
+            _logger.info("Price list %s published for %s", name, location.company_id.name)
+        return new
+
 
     def _send_webhooks(self):
         """Send unsent versions oldest first; stop at the first error (tried again later),
@@ -415,16 +479,21 @@ class L10nHrPriceListLocation(models.Model):
         self.ensure_one()
         if not self.env.user.has_group("base.group_system"):
             raise AccessError(_("Only administrators can publish the price list."))
-        version = self._publish()
+        new = self._publish()
         self._send_webhooks()
-        current = self._current_version()
-        if version:
-            message = _("New price list published: %(name)s", name=current.name)
+        current = self._current_versions()
+        if new:
+            message = _("New price list published: %(names)s", names=", ".join(new.mapped("name")))
+        elif current:
+            message = _("No changes: the current price list is %(names)s", names=", ".join(current.mapped("name")))
         else:
-            message = _("No changes: the current price list is %(name)s", name=current.name)
-        notification_type = "success"
-        if current.webhook_state == "error":
-            message += "\n" + _("Not sent to the webhook: %(error)s. Odoo tries again in an hour.", error=current.webhook_error)
+            message = _("Nothing to publish: the premises has no sellable products with a price.")
+        notification_type = "success" if current else "warning"
+        failed = (new | current).filtered(lambda version: version.webhook_state == "error")
+        if failed:
+            message += "\n" + _(
+                "Not sent to the webhook: %(error)s. Odoo tries again in an hour.", error=failed[0].webhook_error,
+            )
             notification_type = "warning"
         return {
             "type": "ir.actions.client",

@@ -7,7 +7,7 @@ from odoo import http
 from odoo.http import content_disposition, request
 
 from ..models.price_list_location import file_name_part
-from ..models.price_list_version import local_time
+from ..models.price_list_version import KIND_URL, local_time
 
 PAGE = Markup("""<!DOCTYPE html>
 <html lang="%(lang)s"><head><meta charset="utf-8"/>
@@ -19,22 +19,27 @@ td,th{padding:.3em .8em;text-align:left;border-bottom:1px solid #ddd}</style>
 
 
 class PriceListController(http.Controller):
-    """Public price lists, without login (machine-readable, NN 101/26)."""
+    """Public price lists, without login (machine-readable, Pravilnik o načinu objave cjenika proizvoda,
+    NN 132/26). The current file of each premises is always on the same link, /cjenik/<label>/roba or
+    /cjenik/<label>/usluge; every file (also replaced ones) on /cjenik/<file name>."""
 
-    def _current_versions(self, locations):
-        Version = request.env["l10n_hr.price.list.version"].sudo()
-        current = Version.browse()
-        for location in locations:
-            current |= location._current_version()
-        return current
+    def _locations(self):
+        return request.env["l10n_hr.price.list.location"].sudo().search([])
 
     def _page(self, versions, current_only):
         lang = versions[:1].location_id._lang()
         env = request.env(context=dict(request.env.context, lang=lang))
         title = env._("Price list") if current_only else env._("Price list archive")
+
+        def link(version):
+            if current_only and version.kind:
+                label = file_name_part(version.location_id.object_code)
+                return f"/cjenik/{quote(label)}/{KIND_URL[version.kind]}"
+            return f"/cjenik/{quote(version.name)}"
+
         rows = Markup("").join(
             Markup('<tr><td><a href="%s">%s</a></td><td>%s</td><td>%s</td></tr>') % (
-                f"/cjenik/{quote(version.name)}",
+                link(version),
                 version.name,
                 local_time(version.published_at).strftime("%d.%m.%Y %H:%M"),
                 version.location_id.name,
@@ -50,18 +55,24 @@ class PriceListController(http.Controller):
         html = PAGE % {"lang": (lang or "hr").split("_")[0], "title": escape(title), "body": body}
         return request.make_response(html, headers=[("Content-Type", "text/html; charset=utf-8")])
 
-    def _redirect_or_list(self, locations):
-        """One premises: its current file; several: the list of their current files."""
-        current = self._current_versions(locations)
+    def _current_page(self, locations):
+        current = request.env["l10n_hr.price.list.version"].sudo()
+        for location in locations:
+            current |= location._current_versions()
         if not current:
             raise request.not_found()
-        if len(current) == 1:
-            return request.redirect(f"/cjenik/{quote(current.name)}")
         return self._page(current, current_only=True)
+
+    def _file(self, version):
+        return request.make_response(base64.b64decode(version.file), headers=[
+            ("Content-Type", "text/csv; charset=utf-8"),
+            ("Content-Disposition", content_disposition(version.name, "inline")),
+            ("Cache-Control", "no-cache"),
+        ])
 
     @http.route("/cjenik", type="http", auth="public", methods=["GET"], readonly=True)
     def price_list(self, **kwargs):
-        return self._redirect_or_list(request.env["l10n_hr.price.list.location"].sudo().search([]))
+        return self._current_page(self._locations())
 
     @http.route("/cjenik/arhiva", type="http", auth="public", methods=["GET"], readonly=True)
     def price_list_archive(self, **kwargs):
@@ -72,16 +83,17 @@ class PriceListController(http.Controller):
 
     @http.route("/cjenik/<path:name>", type="http", auth="public", methods=["GET"], readonly=True)
     def price_list_file(self, name, **kwargs):
-        """A file (any version, also of archived premises), or the current file of a premises
-        by its label (/cjenik/01)."""
+        """A file by its name (any version, also of archived premises), the current files of a premises by
+        its label (/cjenik/01) or its current goods or services file (/cjenik/01/roba)."""
         version = request.env["l10n_hr.price.list.version"].sudo().search([("name", "=", name)], limit=1)
-        if not version:
-            locations = request.env["l10n_hr.price.list.location"].sudo().search([]).filtered(
-                lambda location: file_name_part(location.object_code) == name
-            )
-            return self._redirect_or_list(locations)
-        return request.make_response(base64.b64decode(version.file), headers=[
-            ("Content-Type", "text/csv; charset=utf-8"),
-            ("Content-Disposition", content_disposition(version.name, "inline")),
-            ("Cache-Control", "no-cache"),
-        ])
+        if version:
+            return self._file(version)
+        label, __, kind_url = name.partition("/")
+        locations = self._locations().filtered(lambda location: file_name_part(location.object_code) == label)
+        if not kind_url:
+            return self._current_page(locations)
+        kind = next((kind for kind, url in KIND_URL.items() if url == kind_url), None)
+        current = locations[:1]._current_version(kind) if kind and locations else None
+        if not current:
+            raise request.not_found()
+        return self._file(current)

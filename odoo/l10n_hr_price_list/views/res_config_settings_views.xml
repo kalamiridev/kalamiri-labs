@@ -9,7 +9,11 @@
                 <block title="Public Price List" id="l10n_hr_price_list">
                     <setting id="price_list_locations" string="Public Price List Premises"
                              company_dependent="1"
-                             help="Consumer price list with the additional price (CSV, NN 101/26), per premises.">
+                             help="Consumer price lists of goods and services with the base price (CSV, NN 132/26), per premises.">
+                        <div class="mt8">
+                            <field name="price_list_natural_person"/>
+                            <label for="price_list_natural_person"/>
+                        </div>
                         <div class="mt8">
                             <button name="%(action_price_list_location)d" type="action" string="Manage premises"
                                     icon="oi-arrow-right" class="btn-link"/>

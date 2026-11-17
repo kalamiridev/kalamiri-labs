@@ -1,19 +1,20 @@
 from odoo import api, fields, models
 
 ANCHOR_HELP = (
-    "Additional price for consumers (with VAT), shown next to the price: the price on "
-    "10 September 2026, or the price when the product was first offered. Set automatically "
-    "when the product is first published in the price list of the premises; later price "
+    "Base price for consumers (with VAT), shown next to the price: the price on 2 May 2025 for food, "
+    "drinks, cosmetics, cleaning products, toiletries and household products, on 10 September 2026 for "
+    "other goods and services, or the price when the product was first offered after that day. Set "
+    "automatically when the product is first published in the price list of the premises; later price "
     "changes do not change it. Only administrators can correct it."
 )
 
 
 class L10nHrPriceListAnchor(models.Model):
-    """Additional price of a product in the price list of one premises (each premises can
+    """Base price of a product in the price list of one premises (each premises can
     have its own prices)."""
 
     _name = "l10n_hr.price.list.anchor"
-    _description = "Additional Price"
+    _description = "Base Price"
     _order = "location_id, product_id"
 
     location_id = fields.Many2one(
@@ -24,12 +25,12 @@ class L10nHrPriceListAnchor(models.Model):
     # Set from the product (also the inverse of the list on the product form).
     product_tmpl_id = fields.Many2one("product.template", string="Product Template", index=True, ondelete="cascade")
     currency_id = fields.Many2one(related="company_id.currency_id")
-    price = fields.Monetary(string="Additional Price", required=True, help=ANCHOR_HELP)
-    date = fields.Date(string="Additional Price Date", required=True, help=ANCHOR_HELP)
+    price = fields.Monetary(string="Base Price", required=True, help=ANCHOR_HELP)
+    date = fields.Date(string="Base Price Date", required=True, help=ANCHOR_HELP)
 
     _location_product_uniq = models.Constraint(
         "UNIQUE(location_id, product_id)",
-        "A product has one additional price per premises.",
+        "A product has one base price per premises.",
     )
 
     @api.model_create_multi

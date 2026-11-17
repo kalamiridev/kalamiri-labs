@@ -37,8 +37,10 @@
                     </div>
                     <group>
                         <group>
-                            <field name="object_type" placeholder="e.g. prodavaonica, ured, servis, webshop"/>
-                            <field name="address" placeholder="Empty: company address"/>
+                            <field name="all_premises"/>
+                            <field name="object_type" placeholder="e.g. prodavaonica, ured, servis, webshop"
+                                   invisible="all_premises" required="not all_premises"/>
+                            <field name="address" placeholder="Empty: company address" invisible="all_premises"/>
                             <field name="object_code" placeholder="e.g. P-01"/>
                             <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                         </group>
@@ -64,8 +66,8 @@
         <field name="view_mode">list,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Add a premises</p>
-            <p>Each premises (shop, office, web shop…) publishes its own price list file with the
-               products of its categories.</p>
+            <p>Each premises (shop, office, web shop…) publishes its own price lists of goods and of
+               services with the products of its categories.</p>
         </field>
     </record>
 

@@ -1,33 +1,34 @@
 <section class="container py-4" style="max-width: 1000px;">
   <div class="text-center mb-4">
     <h1 style="color:#0b121a;">Public Price List for Consumers</h1>
-    <h4 class="text-muted">Croatia &middot; Government decisions NN 101/26 &middot; Odoo 19 Community and Enterprise</h4>
+    <h4 class="text-muted">Croatia &middot; Rulebooks NN 132/26 &middot; Odoo 19 Community and Enterprise</h4>
     <p class="mt-3">
-      Publishes the machine-readable price list (CSV) that Croatian shops, service providers and web shops
-      with a website must publish for every premises, with the additional (anchor) price next to every price.
+      Publishes the machine-readable price lists of goods and services (CSV) that Croatian shops, service providers
+      and web shops with a website must publish for every premises, with the base price next to every price.
     </p>
   </div>
 
   <div class="alert alert-info">
-    <strong>Hrvatski:</strong> javni cjenik za potro&scaron;a&#269;e u CSV datoteci za svaki objekt (prodavaonica, ured,
-    salon, web shop), s dodatnom cijenom i datumom, arhivom od 30 dana, akcijama iz cjenika i webhookom
-    za va&scaron;u mre&#382;nu stranicu (Odluke NN 101/26). Upute na hrvatskom su u README-u modula.
+    <strong>Hrvatski:</strong> javni cjenici robe i usluga za potro&scaron;a&#269;e u CSV datotekama za svaki objekt
+    (prodavaonica, ured, salon, web shop) ili za sva prodajna mjesta, s baznom cijenom, propisanim stupcima i
+    nazivima datoteka, arhivom, akcijama iz cjenika i webhookom za va&scaron;u mre&#382;nu stranicu (Pravilnici
+    NN 132/26, od 17. 11. 2026.). Upute na hrvatskom su u README-u modula.
   </div>
 
   <h2 class="mt-5">What it does</h2>
   <ul>
-    <li><strong>One price list per premises</strong> &ndash; shop, office, salon or web shop &ndash; with the prescribed file name
-      (type, address, label, storage number, date and time) and its own storage numbers.</li>
+    <li><strong>Goods and services price lists per premises</strong> &ndash; shop, office, salon or web shop &ndash; or one
+      for all premises, with the prescribed columns and file names (OIB, premises, ROBA/USLUGE, storage number, time).</li>
     <li><strong>Consumer prices as on a quotation</strong>: the default pricelist of the company (or the sales price) with
       the taxes of the product. Nothing to set up on the premises.</li>
-    <li><strong>Additional price</strong> (price on 10 September 2026, or at the first publication of a product) saved with
-      its date and never changed by later prices. Administrators can correct it.</li>
+    <li><strong>Base price</strong> (price on 2 May 2025 or 10 September 2026, or at the first publication of a product)
+      saved with its date and never changed by later prices. Administrators can correct it.</li>
     <li><strong>Special sales</strong> are ordinary pricelist rules (discount, validity period) with the name of the sale:
       the price list marks them automatically and goes back to the regular price when they end.</li>
-    <li><strong>Always up to date</strong>: a new version a minute after a change and every morning before 08:00
-      (a file of the day also without changes; stock, start and end of special sales).</li>
-    <li><strong>Public link and archive</strong> without login (<code>/cjenik</code>), older versions kept public for at
-      least 30 days.</li>
+    <li><strong>Always up to date</strong>: a new version a minute after a change, and every morning for the start and end
+      of special sales (the deadline is 11:00).</li>
+    <li><strong>Public links without login</strong>: the current file always on the same link
+      (<code>/cjenik/&lt;label&gt;/roba</code>, <code>/usluge</code>), replaced versions in the archive.</li>
     <li><strong>Optional webhook</strong> to your own website (JSON, HMAC-SHA256 signature), with the price before a sale
       and the lowest price in the 30 days before it.</li>
   </ul>
@@ -44,22 +45,18 @@
   <img src="screenshot_pricelist.png" class="img-fluid border rounded shadow-sm" alt="Pricelist rule with a special sale"/>
 
   <h2 class="mt-5">Products</h2>
-  <p>The brand and the additional prices of each premises, on the product form.</p>
+  <p>The brand and the base prices of each premises, on the product form.</p>
   <img src="screenshot_product.png" class="img-fluid border rounded shadow-sm" alt="Public price list section of a product"/>
 
   <h2 class="mt-5">Versions</h2>
-  <p>Every version with its storage number, file and webhook state.</p>
+  <p>Every version with its price list (goods or services), storage number, file and webhook state.</p>
   <img src="screenshot_versions.png" class="img-fluid border rounded shadow-sm" alt="Published versions"/>
 
-  <h2 class="mt-5">The file</h2>
-  <p>CSV, UTF-8 with BOM, semicolons, decimal comma; the same columns for goods and services:</p>
-  <p><code>sifra; naziv; marka; jedinica_mjere; maloprodajna_cijena_eur; cijena_za_jedinicu_mjere_eur;
-    jedinica_mjere_za_cijenu; posebni_oblik_prodaje; naziv_posebnog_oblika_prodaje; dodatna_cijena_eur;
-    datum_dodatne_cijene; barkod; raspolozivost</code></p>
-
-  <h2 class="mt-5">Stock per premises</h2>
-  <p>With Inventory, the module <strong>Public Price List: Stock per Premises</strong> (<code>l10n_hr_price_list_stock</code>)
-    is installed automatically: with several warehouses, choose the warehouse of each premises for its availability.</p>
+  <h2 class="mt-5">The files</h2>
+  <p>CSV, UTF-8 with BOM, semicolons, decimal comma; the prescribed columns in the prescribed order.</p>
+  <p>Goods: <code>naziv; sifra; marka; neto_kolicina; jedinica_mjere; maloprodajna_cijena_eur; posebni_oblik_prodaje;
+    cijena_za_jedinicu_mjere_eur; barkod; ean_barkod; bazna_cijena_eur</code></p>
+  <p>Services: <code>naziv; maloprodajna_cijena_eur; posebni_oblik_prodaje; bazna_cijena_eur</code></p>
 
   <h2 class="mt-5">Limitations</h2>
   <ul>

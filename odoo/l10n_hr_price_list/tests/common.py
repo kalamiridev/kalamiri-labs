@@ -1,10 +1,12 @@
 import base64
 import csv
 import io
+import json
 
 from odoo import Command
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
+from odoo.addons.l10n_hr_price_list.models.price_list_version import COLUMNS, GOODS, SERVICES
 
 
 class PriceListCommon(AccountTestInvoicingCommon):
@@ -16,7 +18,7 @@ class PriceListCommon(AccountTestInvoicingCommon):
         cls.env = cls.env(context=dict(cls.env.context, lang="en_US"))
         cls.company = cls.company_data["company"].with_env(cls.env)
         cls.company.partner_id.lang = "en_US"
-        cls.company.write({"street": "Vukovarska 20", "city": "Osijek"})
+        cls.company.write({"street": "Vukovarska 20", "city": "Osijek", "vat": "HR69114397826"})
         cls.tax_25 = cls.env["account.tax"].create({
             "name": "PDV 25%",
             "amount": 25.0,
@@ -43,7 +45,7 @@ class PriceListCommon(AccountTestInvoicingCommon):
         })
         cls.service = cls._product("SRV-1", "Setup", 100.0, cls.tax_25, type="service")
         cls.goods = cls._product("GDS-1", "Sensor", 125.0, cls.tax_25_included, categ=cls.subcategory,
-                                 barcode="3850000000001", price_list_brand="Acme")
+                                 barcode="3850000000008", price_list_brand="Acme")
         cls.hidden = cls._product("HID-1", "Internal", 10.0, cls.tax_25, categ=cls.other_category)
         cls.Version = cls.env["l10n_hr.price.list.version"]
         cls.Anchor = cls.env["l10n_hr.price.list.anchor"]
@@ -60,10 +62,26 @@ class PriceListCommon(AccountTestInvoicingCommon):
             **values,
         })
 
-    def _lines(self, version):
-        content = base64.b64decode(version.file)
-        self.assertTrue(content.startswith(b"\xef\xbb\xbf"), "UTF-8 with BOM")
-        return {row["sifra"]: row for row in csv.DictReader(io.StringIO(content.decode("utf-8-sig")), delimiter=";")}
+    def _lines(self, versions):
+        """{name: line} of the files of the versions (a services file has no code)."""
+        lines = {}
+        for version in versions:
+            content = base64.b64decode(version.file)
+            self.assertTrue(content.startswith(b"\xef\xbb\xbf"), "UTF-8 with BOM")
+            reader = csv.DictReader(io.StringIO(content.decode("utf-8-sig")), delimiter=";")
+            self.assertEqual(reader.fieldnames, COLUMNS[version.kind], "The prescribed columns in their order")
+            lines.update({row["naziv"]: row for row in reader})
+        return lines
+
+    def _rows(self, versions):
+        """{code: row} saved with the versions (also sent on the webhook)."""
+        return {row["sifra"]: row for version in versions for row in json.loads(version.rows_json)}
+
+    def _goods(self, versions):
+        return versions.filtered(lambda version: version.kind == GOODS)
+
+    def _services(self, versions):
+        return versions.filtered(lambda version: version.kind == SERVICES)
 
     def _anchor(self, product, location=None):
         return self.Anchor.search([("product_id", "=", product.id), ("location_id", "=", (location or self.location).id)])

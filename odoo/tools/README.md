@@ -22,7 +22,7 @@ Modules are developed here and released to
 Store expects). The release repository is never edited by hand:
 
 ```
-python publish.py ../../../odoo-croatia l10n_hr_price_list l10n_hr_price_list_stock
+python publish.py ../../../odoo-croatia l10n_hr_price_list
 ```
 
 It checks that each module is committed and has a README, LICENSE, icon and description page, copies it without

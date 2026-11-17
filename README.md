@@ -24,8 +24,7 @@ where they are developed; release tools are in [`odoo/tools`](./odoo/tools/).
 
 | Module | Description |
 |---|---|
-| [`l10n_hr_price_list`](./odoo/l10n_hr_price_list/) | Public price lists for consumers (CSV, per premises, with the additional price, NN 101/26), with an optional webhook |
-| [`l10n_hr_price_list_stock`](./odoo/l10n_hr_price_list_stock/) | Availability in the public price list from the warehouse of each premises (installed automatically with Inventory) |
+| [`l10n_hr_price_list`](./odoo/l10n_hr_price_list/) | Public price lists of goods and services for consumers (CSV, per premises, with the base price, NN 132/26), with an optional webhook |
 
 ## Licensing
 
