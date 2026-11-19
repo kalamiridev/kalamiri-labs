@@ -12,6 +12,12 @@ Docker service that reads Huawei FusionSolar plant data and publishes it to MQTT
 
 [`integrations/fusionsolar-mqtt`](./integrations/fusionsolar-mqtt/)
 
+#### HomeKit MQTT
+
+Docker service that pairs with HomeKit accessories on the local network and bridges them to MQTT, in the format of Zigbee2MQTT, with optional Home Assistant MQTT Discovery support.
+
+[`integrations/homekit-mqtt`](./integrations/homekit-mqtt/)
+
 ### Odoo modules
 
 Modules for Odoo 19 (Community and Enterprise), mostly for Croatian companies. Each module has a README

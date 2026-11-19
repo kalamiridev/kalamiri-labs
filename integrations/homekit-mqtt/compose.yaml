@@ -1,0 +1,22 @@
+services:
+  homekit-mqtt:
+    container_name: homekit-mqtt
+    image: senzolink/homekit-mqtt:1.0.0
+    # HomeKit accessories announce themselves with mDNS, which needs the host network.
+    network_mode: host
+    environment:
+      MQTT_HOST: "${MQTT_HOST:?MQTT_HOST is required}"
+      MQTT_PORT: "${MQTT_PORT:-1883}"
+      MQTT_USERNAME: "${MQTT_USERNAME:-}"
+      MQTT_PASSWORD: "${MQTT_PASSWORD:-}"
+      MQTT_TLS_ENABLED: "${MQTT_TLS_ENABLED:-false}"
+      MQTT_CLIENT_ID: "${MQTT_CLIENT_ID:-homekit-mqtt}"
+      MQTT_BASE_TOPIC: "${MQTT_BASE_TOPIC:-homekit}"
+      HA_DISCOVERY_ENABLED: "${HA_DISCOVERY_ENABLED:-true}"
+      HA_DISCOVERY_PREFIX: "${HA_DISCOVERY_PREFIX:-homeassistant}"
+      HOMEKIT_POLL_INTERVAL: "${HOMEKIT_POLL_INTERVAL:-60}"
+      HOMEKIT_INCLUDE_VENDOR: "${HOMEKIT_INCLUDE_VENDOR:-false}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+    volumes:
+      - "./data:/data"
+    restart: unless-stopped
