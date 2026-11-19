@@ -26,7 +26,7 @@ MQTT
 The public image is available on Docker Hub:
 
 ```bash
-docker pull senzolink/fusionsolar-mqtt:1.0.1
+docker pull senzolink/fusionsolar-mqtt:1.0.2
 ```
 
 `compose.yaml` uses the maintained release tag by default. Pull deliberately

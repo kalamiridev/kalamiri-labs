@@ -1,7 +1,7 @@
 services:
   fusionsolar-mqtt:
     container_name: fusionsolar-mqtt
-    image: senzolink/fusionsolar-mqtt:1.0.1
+    image: senzolink/fusionsolar-mqtt:1.0.2
     environment:
       FUSIONSOLAR_USERNAME: ${FUSIONSOLAR_USERNAME:?FUSIONSOLAR_USERNAME is required}
       FUSIONSOLAR_PASSWORD: ${FUSIONSOLAR_PASSWORD:?FUSIONSOLAR_PASSWORD is required}
