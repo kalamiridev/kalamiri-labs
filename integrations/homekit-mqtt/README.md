@@ -139,6 +139,19 @@ After every command the device's state is read back and published, also when
 nothing changed, so the sender sees the command answered. A value outside the
 accessory's range, or one the property does not accept, is refused and logged.
 
+### Sharing the base topic
+
+The base topic may be the one of Zigbee2MQTT and other services, as on a
+gateway. A device of the same name would then share the accessory's topics:
+its state would mix with the accessory's and a command would reach both. The
+service therefore reads the catalogs on the base topic before it publishes:
+Zigbee2MQTT's `<base>/bridge/devices` and those of the services named before
+it (`<base>/<service>/bridge/devices`, compared with `BRIDGE_NAME`). A device
+whose name one of them has is left out, logged as an error: no state, no
+commands and no Home Assistant entities. It comes back by itself when either
+device is renamed. Commands for the other devices on the base topic are
+ignored.
+
 ### Properties
 
 Each HomeKit accessory is one device. A property that appears in more than one

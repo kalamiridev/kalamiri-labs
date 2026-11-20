@@ -19,7 +19,7 @@ class FakePublisher:
         self.messages = []
 
     async def publish(self, topic, payload, retain=True):
-        self.messages.append((topic, json.loads(payload), retain))
+        self.messages.append((topic, json.loads(payload) if payload else None, retain))
 
     def last(self, topic):
         for found, payload, _retain in reversed(self.messages):
@@ -120,6 +120,26 @@ class BridgeTest(unittest.IsolatedAsyncioTestCase):
         await self.bridge.handle_command("My ecobee", "not json")
         await self.bridge.handle_command("My ecobee", "[]")
         self.assertEqual(len(self.publisher.messages), before)
+
+    async def test_a_name_another_device_has_leaves_the_device_out(self):
+        catalog = f"{BASE}/bridge/devices"
+        self.bridge.taken.apply(catalog, json.dumps([{"friendly_name": "My ecobee", "ieee_address": "0x01"}]))
+        with self.assertLogs("homekit_mqtt.bridge", "ERROR"):
+            self.bridge.apply_names()
+        before = len(self.publisher.messages)
+        await self.bridge.flush()
+        published = self.publisher.messages[before:]
+        self.assertNotIn(f"{BASE}/My ecobee", [topic for topic, _payload, _retain in published])
+        self.assertIsNone(self.publisher.last("client/c1/ha/climate/homekit_ecobee_1/climate/config"))
+        before = len(self.publisher.messages)
+        await self.bridge.handle_command("My ecobee", json.dumps({"system_mode": "heat"}))
+        self.assertEqual(len(self.publisher.messages), before)
+
+        self.bridge.taken.apply(catalog, json.dumps([{"friendly_name": "Hall Plug", "ieee_address": "0x01"}]))
+        self.bridge.apply_names()
+        await self.bridge.flush()
+        self.assertEqual(self.publisher.last(f"{BASE}/My ecobee")["system_mode"], "auto")
+        self.assertIsNotNone(self.publisher.last("client/c1/ha/climate/homekit_ecobee_1/climate/config"))
 
 
 if __name__ == "__main__":

@@ -19,6 +19,7 @@ from zeroconf.asyncio import AsyncServiceBrowser, AsyncZeroconf
 from . import cli
 from . import config as settings
 from .bridge import Bridge
+from .names import TakenNames
 
 LOG = logging.getLogger("homekit_mqtt")
 PAIRING_WAIT = 60
@@ -55,15 +56,26 @@ async def run_mqtt(cfg: settings.Config, bridge: Bridge) -> None:
             ) as client:
                 LOG.info("Connected to MQTT %s:%d", cfg.mqtt_host, cfg.mqtt_port)
                 delay = 5
-                publisher = MqttPublisher(client)
+                # The catalogs of the others first (see names.py). Their retained messages come before the
+                # bridge's own availability, subscribed after them, so nothing is published before they are in.
+                bridge.taken = TakenNames(cfg.base_topic, cfg.bridge_name)
+                for topic in bridge.taken.topics:
+                    await client.subscribe(topic, qos=1)
+                await client.subscribe(cfg.bridge_availability_topic, qos=1)
                 await client.publish(cfg.bridge_availability_topic, _online(True), qos=1, retain=True)
-                await client.subscribe(f"{cfg.base_topic}/+/set", qos=1)
-                bridge.publisher = publisher
-                bridge.everything_changed()
                 try:
                     async for message in client.messages:
                         topic = str(message.topic)
-                        if topic.startswith(prefix) and topic.endswith("/set"):
+                        if topic == cfg.bridge_availability_topic:
+                            if bridge.publisher is None:
+                                await client.unsubscribe(cfg.bridge_availability_topic)
+                                bridge.apply_names()
+                                await client.subscribe(f"{cfg.base_topic}/+/set", qos=1)
+                                bridge.publisher = MqttPublisher(client)
+                                bridge.everything_changed()
+                        elif bridge.taken.apply(topic, message.payload):
+                            bridge.apply_names()
+                        elif topic.startswith(prefix) and topic.endswith("/set"):
                             name = topic[len(prefix) : -len("/set")]
                             await bridge.handle_command(name, message.payload)
                 except asyncio.CancelledError:

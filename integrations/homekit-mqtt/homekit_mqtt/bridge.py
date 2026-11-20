@@ -14,6 +14,7 @@ from aiohomekit.model.characteristics import Characteristic
 from .config import Config
 from .discovery import discovery_messages
 from .mapping import Device, build_devices, make_names_unique, plan_writes, state
+from .names import TakenNames
 
 LOG = logging.getLogger(__name__)
 
@@ -48,6 +49,8 @@ class Bridge:
         self.changed = asyncio.Event()
         self.publisher: Publisher | None = None
         self._stoppers: list[Callable[[], None]] = []
+        self.taken = TakenNames(config.base_topic, config.bridge_name)
+        self.left_out: dict[str, str] = {}  # device -> the catalog that has its name
 
     # ------------------------------------------------------------------ devices
 
@@ -75,6 +78,30 @@ class Bridge:
             "Devices: %s",
             ", ".join(f"{d.name} ({len(d.props)} properties)" for d in devices) or "none",
         )
+        self.apply_names()
+
+    def apply_names(self) -> None:
+        """Leave out the devices whose name another device has (see names.py)."""
+        for name in [name for name in self.left_out if name not in self.devices]:
+            del self.left_out[name]
+        for name in self.devices:
+            owner = self.taken.owner(name)
+            if owner == self.left_out.get(name):
+                continue
+            if owner is None:
+                del self.left_out[name]
+                LOG.info("%s: the name is free again; the device is published", name)
+            else:
+                self.left_out[name] = owner
+                LOG.error(
+                    "%s: %s already has a device of this name, which shares its topic and commands; "
+                    "the device is left out until one of them is renamed",
+                    name,
+                    owner,
+                )
+            self.dirty.add(name)
+            self.discovery_dirty = True
+            self.changed.set()
 
     def _mark(self, alias: str, aids: set[int] | None = None, seen: bool = True) -> None:
         now = _now()
@@ -197,8 +224,9 @@ class Bridge:
     async def handle_command(self, name: str, payload: bytes | str) -> None:
         """Apply a command from <base>/<device>/set and publish the new state."""
         device = self.devices.get(name)
-        if device is None:
-            LOG.warning("Command for unknown device %r", name)
+        if device is None or name in self.left_out:
+            # The base topic may hold other devices, e.g. of Zigbee2MQTT; their commands are theirs.
+            LOG.debug("Command for a device of another service: %r", name)
             return
         try:
             command = json.loads(payload)
@@ -259,17 +287,19 @@ class Bridge:
         if self.discovery_dirty and self.config.discovery_enabled:
             self.discovery_dirty = False
             for device in self.devices.values():
+                left_out = device.name in self.left_out
                 for topic, config in discovery_messages(
                     device,
                     self.config.base_topic,
                     self.config.discovery_prefix,
                     self.config.bridge_availability_topic,
                 ):
-                    await publisher.publish(topic, json.dumps(config, ensure_ascii=False))
+                    # An empty retained config removes the entities of a device left out: their topic is another's.
+                    await publisher.publish(topic, "" if left_out else json.dumps(config, ensure_ascii=False))
         names, self.dirty = self.dirty, set()
         for name in sorted(names):
             device = self.devices.get(name)
-            if device is None:
+            if device is None or name in self.left_out:
                 continue
             available = self.available.get(device.alias)
             topic = self.device_topic(device)
