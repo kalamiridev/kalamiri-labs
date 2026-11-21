@@ -28,9 +28,15 @@ PAIRING_WAIT = 60
 class MqttPublisher:
     def __init__(self, client: aiomqtt.Client) -> None:
         self.client = client
+        self.watched: set[str] = set()  # per connection: a new one starts without subscriptions
 
     async def publish(self, topic: str, payload: str, retain: bool = True) -> None:
         await self.client.publish(topic, payload, qos=1, retain=retain)
+
+    async def watch(self, topic: str) -> None:
+        if topic not in self.watched:
+            self.watched.add(topic)
+            await self.client.subscribe(topic, qos=1)
 
 
 def _online(online: bool) -> str:
@@ -78,6 +84,9 @@ async def run_mqtt(cfg: settings.Config, bridge: Bridge) -> None:
                         elif topic.startswith(prefix) and topic.endswith("/set"):
                             name = topic[len(prefix) : -len("/set")]
                             await bridge.handle_command(name, message.payload)
+                        elif not message.payload:
+                            # The watched discovery configs: their own echo has a payload, a clear has none.
+                            bridge.discovery_cleared(topic)
                 except asyncio.CancelledError:
                     # A clean disconnect does not send the will, so say offline first.
                     bridge.publisher = None

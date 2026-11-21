@@ -211,6 +211,13 @@ with their measured temperature and humidity also as sensors), lights, switches 
 security systems, sensors and binary sensors. Every property is on MQTT either
 way.
 
+A discovery config that another client clears is published again 15 s later.
+Zigbee2MQTT on the same base topic clears, when it starts, every config whose
+availability is under that base topic; without this, Home Assistant would lose
+the devices of this service until the service starts again. A device deleted
+in Home Assistant therefore comes back while it is paired: to remove it,
+unpair it.
+
 ## Development
 
 ```bash

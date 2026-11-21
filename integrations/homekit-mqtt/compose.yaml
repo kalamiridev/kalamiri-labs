@@ -1,7 +1,7 @@
 services:
   homekit-mqtt:
     container_name: homekit-mqtt
-    image: senzolink/homekit-mqtt:1.0.0
+    image: senzolink/homekit-mqtt:1.0.1
     # HomeKit accessories announce themselves with mDNS, which needs the host network.
     network_mode: host
     environment:

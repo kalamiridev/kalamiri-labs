@@ -20,9 +20,17 @@ LOG = logging.getLogger(__name__)
 
 Key = tuple[str, int, int]  # alias, aid, iid
 
+# How long to wait before giving back a discovery config that another client cleared. Zigbee2MQTT clears, for
+# 5 s after it starts, every retained config under the discovery prefix whose availability is under its base
+# topic, which the services of a gateway share; a config given back after that stays.
+REDISCOVERY_DELAY = 15.0
+
 
 class Publisher(Protocol):
     async def publish(self, topic: str, payload: str, retain: bool = True) -> None: ...
+
+    async def watch(self, topic: str) -> None:
+        """Subscribe to a topic filter, once per connection."""
 
 
 def _now() -> str:
@@ -51,6 +59,9 @@ class Bridge:
         self._stoppers: list[Callable[[], None]] = []
         self.taken = TakenNames(config.base_topic, config.bridge_name)
         self.left_out: dict[str, str] = {}  # device -> the catalog that has its name
+        self.discovery_topics: set[str] = set()  # the configs last published, not the cleared ones
+        self.rediscovery_delay = REDISCOVERY_DELAY
+        self._rediscovery: asyncio.Task[None] | None = None
 
     # ------------------------------------------------------------------ devices
 
@@ -218,6 +229,8 @@ class Bridge:
         for stop in self._stoppers:
             stop()
         self._stoppers.clear()
+        if self._rediscovery is not None:
+            self._rediscovery.cancel()
 
     # ------------------------------------------------------------------ commands
 
@@ -286,16 +299,26 @@ class Bridge:
             return
         if self.discovery_dirty and self.config.discovery_enabled:
             self.discovery_dirty = False
-            for device in self.devices.values():
-                left_out = device.name in self.left_out
+            messages = [
+                (device, topic, config)
+                for device in self.devices.values()
                 for topic, config in discovery_messages(
                     device,
                     self.config.base_topic,
                     self.config.discovery_prefix,
                     self.config.bridge_availability_topic,
-                ):
-                    # An empty retained config removes the entities of a device left out: their topic is another's.
-                    await publisher.publish(topic, "" if left_out else json.dumps(config, ensure_ascii=False))
+                )
+            ]
+            self.discovery_topics = {
+                topic for device, topic, _config in messages if device.name not in self.left_out
+            }
+            for device, topic, config in messages:
+                # An empty retained config removes the entities of a device left out: their topic is another's.
+                left_out = device.name in self.left_out
+                if not left_out:
+                    # Watched before it is published, so a clear right after it is seen (see discovery_cleared).
+                    await publisher.watch(topic)
+                await publisher.publish(topic, "" if left_out else json.dumps(config, ensure_ascii=False))
         names, self.dirty = self.dirty, set()
         for name in sorted(names):
             device = self.devices.get(name)
@@ -323,5 +346,23 @@ class Bridge:
 
     def everything_changed(self) -> None:
         self.dirty.update(self.devices)
+        self.discovery_dirty = True
+        self.changed.set()
+
+    def discovery_cleared(self, topic: str) -> None:
+        """A config of a published device was cleared by another client: give it back a little later.
+
+        Zigbee2MQTT does so when it starts (see REDISCOVERY_DELAY); without the config Home Assistant loses the
+        device until this service starts again.
+        """
+        if topic not in self.discovery_topics:
+            return
+        if self._rediscovery is not None and not self._rediscovery.done():
+            return
+        LOG.info("%s was cleared; discovery is published again in %g s", topic, self.rediscovery_delay)
+        self._rediscovery = asyncio.get_running_loop().create_task(self._rediscover())
+
+    async def _rediscover(self) -> None:
+        await asyncio.sleep(self.rediscovery_delay)
         self.discovery_dirty = True
         self.changed.set()
