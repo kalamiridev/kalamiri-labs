@@ -175,6 +175,53 @@ class ThermostatTest(unittest.TestCase):
         self.assertIn("read-only", errors[0])
 
 
+class EcobeePremiumTest(unittest.TestCase):
+    """An ecobee Smart Thermostat Premium (ECB601) with a SmartSensor, as it describes itself."""
+
+    OPTIONS = {
+        "Thermostat": DeviceOptions(
+            name="Living Room Thermostat",
+            limits={"occupied_heating_setpoint": (18, 24), "occupied_cooling_setpoint": (22, 28)},
+            exclude=frozenset({
+                "temperature_display_units", "target_humidity", "fan_state",
+                "current_media_state", "target_media_state", "mute", "volume", "airplay_enable",
+            }),
+        ),
+        "SmartSensor": DeviceOptions(
+            name="Master Bedroom Room Sensor", exclude=frozenset({"charging_state", "active"})
+        ),
+    }
+
+    def test_voice_assistants_and_hub_services_are_left_out(self):
+        thermostat, sensor = build_devices("test", accessories("ecobee_premium"), {})
+        self.assertEqual((thermostat.name, sensor.name), ("Thermostat", "SmartSensor"))
+        self.assertEqual(
+            set(thermostat.props),
+            {
+                "system_mode", "running_state", "local_temperature", "temperature_display_units",
+                "fan_mode", "fan_state", "humidity", "target_humidity", "occupancy", "motion",
+                "current_media_state", "target_media_state", "mute", "volume", "airplay_enable",
+            },
+        )
+
+    def test_same_messages_as_the_home_assistant_automations(self):
+        thermostat, sensor = build_devices("test", accessories("ecobee_premium"), self.OPTIONS)
+        self.assertEqual(
+            set(state(thermostat, current)),
+            {
+                "system_mode", "running_state", "local_temperature", "humidity",
+                "occupied_heating_setpoint", "occupied_cooling_setpoint",
+                "min_heat_setpoint_limit", "max_heat_setpoint_limit",
+                "min_cool_setpoint_limit", "max_cool_setpoint_limit",
+                "fan_mode", "occupancy", "motion",
+            },
+        )
+        self.assertEqual(sensor.name, "Master Bedroom Room Sensor")
+        self.assertEqual(
+            set(state(sensor, current)), {"temperature", "occupancy", "motion", "battery", "battery_low"}
+        )
+
+
 class DevicesTest(unittest.TestCase):
     def test_remote_sensors_are_devices_with_one_status(self):
         devices = build_devices("test", accessories("ecobee3"), {})

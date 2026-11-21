@@ -2,7 +2,7 @@ import json
 import unittest
 
 from homekit_mqtt.discovery import discovery_messages
-from homekit_mqtt.mapping import build_devices
+from homekit_mqtt.mapping import DeviceOptions, build_devices
 
 from .helpers import accessories
 
@@ -25,11 +25,28 @@ class DiscoveryTest(unittest.TestCase):
         self.assertEqual(climate["fan_modes"], ["on", "auto"])
         self.assertEqual(climate["min_temp"], 7.2)
         self.assertEqual(climate["max_temp"], 33.3)
+        self.assertEqual(climate["temp_step"], 0.1)
         self.assertNotIn("state_topic", climate)
-        # occupancy and motion are binary sensors; values in the climate are not repeated
+        # occupancy and motion are binary sensors; setpoints are only in the climate
         topics = sorted(found)
         self.assertIn(f"{PREFIX}/binary_sensor/homekit_test_1/occupancy/config", topics)
-        self.assertNotIn(f"{PREFIX}/sensor/homekit_test_1/humidity/config", topics)
+        self.assertFalse([t for t in topics if "setpoint" in t])
+
+    def test_thermostat_temperature_and_humidity_are_sensors(self):
+        found = messages("ecobee_501")
+        temperature = found[f"{PREFIX}/sensor/homekit_test_1/temperature/config"]
+        self.assertEqual(temperature["device_class"], "temperature")
+        self.assertEqual(temperature["unit_of_measurement"], "°C")
+        self.assertEqual(temperature["value_template"], "{{ value_json['local_temperature'] }}")
+        self.assertEqual(temperature["unique_id"], "homekit_test_1_temperature")
+        humidity = found[f"{PREFIX}/sensor/homekit_test_1/humidity/config"]
+        self.assertEqual(humidity["device_class"], "humidity")
+        self.assertEqual(humidity["value_template"], "{{ value_json['humidity'] }}")
+
+    def test_climate_step_from_the_devices_file(self):
+        device = build_devices("test", accessories("ecobee_501"), {"My ecobee": DeviceOptions(step=0.5)})[0]
+        found = {topic: config for topic, config in discovery_messages(device, BASE, PREFIX, BRIDGE)}
+        self.assertEqual(found[f"{PREFIX}/climate/homekit_test_1/climate/config"]["temp_step"], 0.5)
 
     def test_climate_mode_command_maps_heat_cool_to_auto(self):
         climate = messages("ecobee_501")[f"{PREFIX}/climate/homekit_test_1/climate/config"]
@@ -39,6 +56,10 @@ class DiscoveryTest(unittest.TestCase):
         climate = messages("ecobee_501")[f"{PREFIX}/climate/homekit_test_1/climate/config"]
         self.assertIn("occupied_cooling_setpoint if value_json.system_mode == 'cool'", climate["temperature_state_template"])
         self.assertIn("occupied_heating_setpoint", climate["temperature_command_template"])
+        # auto has no single target and heat has no range, as Home Assistant shows a HomeKit thermostat
+        self.assertIn("system_mode == 'heat' else None", climate["temperature_state_template"])
+        self.assertIn("system_mode == 'auto' else None", climate["temperature_low_state_template"])
+        self.assertIn("system_mode == 'auto' else None", climate["temperature_high_state_template"])
 
     def test_outlets_are_switches_with_json_payloads(self):
         found = messages("mss425f")

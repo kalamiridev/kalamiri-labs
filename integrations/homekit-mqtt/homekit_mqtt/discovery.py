@@ -3,7 +3,8 @@
 Common HomeKit services get a matching Home Assistant entity: thermostat,
 light, switch and outlet, fan, lock, window covering, garage door, security
 system, and sensors. Every property is on MQTT either way; discovery only adds
-entities for the services listed here.
+entities for the services listed here. A thermostat also gets its measured
+temperature and humidity as sensors.
 """
 
 from __future__ import annotations
@@ -110,6 +111,22 @@ def discovery_messages(
             if part.service.type == S.THERMOSTAT:
                 used.update(part.names)
         used.update({HEATING_SETPOINT, COOLING_SETPOINT})
+        # The measured temperature and humidity are also entities of their own, for
+        # history, graphs and automations, as Home Assistant does for a HomeKit thermostat.
+        for name, object_id in (("local_temperature", "temperature"), ("humidity", "humidity")):
+            if name in props:
+                device_class, unit = SENSORS[object_id]
+                add(
+                    "sensor",
+                    object_id,
+                    {
+                        "name": _label(object_id),
+                        "device_class": device_class,
+                        "unit_of_measurement": unit,
+                        "state_class": "measurement",
+                        "value_template": "{{ value_json['" + name + "'] }}",
+                    },
+                )
 
     for part in device.services:
         names = part.names
@@ -325,21 +342,29 @@ def _climate(device: Device, state_topic: str, command_topic: str) -> dict[str, 
         "current_temperature_topic": state_topic,
         "current_temperature_template": "{{ value_json.local_temperature }}",
         "temperature_low_state_topic": state_topic,
-        "temperature_low_state_template": "{{ value_json.occupied_heating_setpoint }}",
+        # The range is the thresholds of auto mode; in the other modes it is empty, so
+        # Home Assistant shows one target temperature (None clears the value).
+        "temperature_low_state_template": (
+            "{{ value_json.occupied_heating_setpoint if value_json.system_mode == 'auto' else None }}"
+        ),
         "temperature_low_command_topic": command_topic,
         "temperature_low_command_template": '{"occupied_heating_setpoint": {{ value }}}',
         "temperature_high_state_topic": state_topic,
-        "temperature_high_state_template": "{{ value_json.occupied_cooling_setpoint }}",
+        "temperature_high_state_template": (
+            "{{ value_json.occupied_cooling_setpoint if value_json.system_mode == 'auto' else None }}"
+        ),
         "temperature_high_command_topic": command_topic,
         "temperature_high_command_template": '{"occupied_cooling_setpoint": {{ value }}}',
     }
     # In heat or cool both setpoints are the target temperature; the service uses the one of the mode.
+    # In auto and off there is no single target, so Home Assistant shows the range or nothing.
     config.update(
         {
             "temperature_state_topic": state_topic,
             "temperature_state_template": (
                 "{{ value_json.occupied_cooling_setpoint if value_json.system_mode == 'cool' "
-                "else value_json.occupied_heating_setpoint }}"
+                "else value_json.occupied_heating_setpoint if value_json.system_mode == 'heat' "
+                "else None }}"
             ),
             "temperature_command_topic": command_topic,
             "temperature_command_template": (
@@ -347,6 +372,12 @@ def _climate(device: Device, state_topic: str, command_topic: str) -> dict[str, 
             ),
         }
     )
+    # The step from the devices file, or else the thermostat's own, as Home Assistant
+    # uses it for a HomeKit thermostat.
+    step_source = thermostat.target or thermostat.heating or thermostat.cooling
+    step = thermostat.step or (step_source.minStep if step_source is not None else None)
+    if step:
+        config["temp_step"] = step
     if low is not None:
         config["min_temp"] = low
     if high is not None:

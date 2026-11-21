@@ -43,6 +43,7 @@ class ConfigTest(unittest.TestCase):
                         "name": "Living Room Thermostat",
                         "limits": {"occupied_heating_setpoint": [18, 24]},
                         "exclude": ["target_humidity"],
+                        "step": 0.5,
                     }
                 }
             ),
@@ -52,6 +53,7 @@ class ConfigTest(unittest.TestCase):
         self.assertEqual(options.name, "Living Room Thermostat")
         self.assertEqual(options.limits, {"occupied_heating_setpoint": (18.0, 24.0)})
         self.assertEqual(options.exclude, frozenset({"target_humidity"}))
+        self.assertEqual(options.step, 0.5)
 
     def test_devices_file_errors(self):
         path = Path(self.dir.name) / "devices.json"
@@ -61,6 +63,7 @@ class ConfigTest(unittest.TestCase):
             json.dumps({"x": {"limits": {"y": [5, 1]}}}),
             json.dumps({"x": {"colour": "red"}}),
             json.dumps({"x": {"exclude": "humidity"}}),
+            json.dumps({"x": {"step": 0}}),
         ):
             path.write_text(content, encoding="utf-8")
             with self.assertRaises(settings.ConfigError, msg=content):

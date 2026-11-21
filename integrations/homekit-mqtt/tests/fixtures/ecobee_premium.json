@@ -1,0 +1,1680 @@
+[
+  {
+    "aid": 1,
+    "services": [
+      {
+        "iid": 1,
+        "type": "0000003E-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 6,
+            "type": "00000014-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "perms": [
+              "pw"
+            ]
+          },
+          {
+            "iid": 3,
+            "type": "00000020-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "ecobee Inc.",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 5,
+            "type": "00000021-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "ECB601",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 2,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "Thermostat",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 4,
+            "type": "00000030-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "000000000001",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 8,
+            "type": "00000052-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "4.10.330050",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 11,
+            "type": "34AB8811-AC7F-4340-BAC3-FD6A85F9943B",
+            "format": "string",
+            "value": "",
+            "perms": [
+              "pr",
+              "hd"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 10,
+            "type": "00000220-0000-1000-8000-0026BB765291",
+            "format": "data",
+            "value": "",
+            "perms": [
+              "pr",
+              "hd"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxDataLen": 8
+          },
+          {
+            "iid": 9,
+            "type": "000000A6-0000-1000-8000-0026BB765291",
+            "format": "uint32",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      },
+      {
+        "iid": 30,
+        "type": "000000A2-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 31,
+            "type": "00000037-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "1.1.0",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      },
+      {
+        "iid": 16,
+        "type": "0000004A-0000-1000-8000-0026BB765291",
+        "primary": true,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 17,
+            "type": "0000000F-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 2,
+            "minStep": 1,
+            "valid-values": [
+              0,
+              1,
+              2
+            ]
+          },
+          {
+            "iid": 18,
+            "type": "00000033-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 3,
+            "minStep": 1,
+            "valid-values": [
+              0,
+              1,
+              2,
+              3
+            ]
+          },
+          {
+            "iid": 19,
+            "type": "00000011-0000-1000-8000-0026BB765291",
+            "format": "float",
+            "value": 22.3,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 0,
+            "maxValue": 40.0,
+            "minStep": 0.1
+          },
+          {
+            "iid": 20,
+            "type": "00000035-0000-1000-8000-0026BB765291",
+            "format": "float",
+            "value": 23.0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 7.2,
+            "maxValue": 33.3,
+            "minStep": 0.1
+          },
+          {
+            "iid": 21,
+            "type": "00000036-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1,
+            "valid-values": [
+              0,
+              1
+            ]
+          },
+          {
+            "iid": 22,
+            "type": "0000000D-0000-1000-8000-0026BB765291",
+            "format": "float",
+            "value": 25.0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 18.3,
+            "maxValue": 33.3,
+            "minStep": 0.1
+          },
+          {
+            "iid": 23,
+            "type": "00000012-0000-1000-8000-0026BB765291",
+            "format": "float",
+            "value": 23.0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 7.2,
+            "maxValue": 26.1,
+            "minStep": 0.1
+          },
+          {
+            "iid": 27,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "Thermostat",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 75,
+            "type": "000000BF-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 76,
+            "type": "000000AF-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 2,
+            "minStep": 1
+          },
+          {
+            "iid": 33,
+            "type": "B7DDB9A3-54BB-4572-91D2-F1F5B0510F8C",
+            "format": "uint8",
+            "value": 3,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 3,
+            "minStep": 1
+          },
+          {
+            "iid": 34,
+            "type": "E4489BBC-5227-4569-93E5-B345E3E5508F",
+            "format": "float",
+            "value": 23.0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 7.2,
+            "maxValue": 26.1,
+            "minStep": 0.1
+          },
+          {
+            "iid": 35,
+            "type": "7D381BAA-20F9-40E5-9BE9-AEB92D4BECEF",
+            "format": "float",
+            "value": 25.0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 18.3,
+            "maxValue": 33.3,
+            "minStep": 0.1
+          },
+          {
+            "iid": 36,
+            "type": "73AAB542-892A-4439-879A-D2A883724B69",
+            "format": "float",
+            "value": 23.0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 7.2,
+            "maxValue": 26.1,
+            "minStep": 0.1
+          },
+          {
+            "iid": 37,
+            "type": "5DA985F0-898A-4850-B987-B76C6C78D670",
+            "format": "float",
+            "value": 25.0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 18.3,
+            "maxValue": 33.3,
+            "minStep": 0.1
+          },
+          {
+            "iid": 38,
+            "type": "05B97374-6DC0-439B-A0FA-CA33F612D425",
+            "format": "float",
+            "value": 23.0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 7.2,
+            "maxValue": 26.1,
+            "minStep": 0.1
+          },
+          {
+            "iid": 39,
+            "type": "A251F6E7-AC46-4190-9C5D-3D06277BDF9F",
+            "format": "float",
+            "value": 25.0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 18.3,
+            "maxValue": 33.3,
+            "minStep": 0.1
+          },
+          {
+            "iid": 40,
+            "type": "1B300BC2-CFFC-47FF-89F9-BD6CCF5F2853",
+            "format": "uint8",
+            "perms": [
+              "pw"
+            ],
+            "minValue": 0,
+            "maxValue": 3,
+            "minStep": 1
+          },
+          {
+            "iid": 41,
+            "type": "1621F556-1367-443C-AF19-82AF018E99DE",
+            "format": "string",
+            "value": "2035-01-03T00:00:00+01:00A",
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 48,
+            "type": "FA128DE6-9D7D-49A4-B6D8-4E4E234DEE38",
+            "format": "bool",
+            "perms": [
+              "pw"
+            ]
+          },
+          {
+            "iid": 49,
+            "type": "4A6AE4F6-036C-495D-87CC-B3702B437741",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 4,
+            "minStep": 1
+          },
+          {
+            "iid": 50,
+            "type": "DB7BF261-7042-4194-8BD1-3AA22830AEDD",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 3,
+            "minStep": 1
+          },
+          {
+            "iid": 51,
+            "type": "41935E3E-B54D-42E9-B8B9-D33C6319F0AF",
+            "format": "bool",
+            "value": 0,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 52,
+            "type": "C35DA3C0-E004-40E3-B153-46655CDD9214",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "percentage",
+            "minValue": 0,
+            "maxValue": 100,
+            "minStep": 1
+          },
+          {
+            "iid": 53,
+            "type": "48F62AEC-4171-4B4A-8F0E-1EEB6708B3FB",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "percentage",
+            "minValue": 0,
+            "maxValue": 100,
+            "minStep": 1
+          },
+          {
+            "iid": 54,
+            "type": "1B1515F2-CC45-409F-991F-C480987F92C3",
+            "format": "string",
+            "value": "No pending alerts.",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 256
+          },
+          {
+            "iid": 24,
+            "type": "00000010-0000-1000-8000-0026BB765291",
+            "format": "float",
+            "value": 50.0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "percentage",
+            "minValue": 0,
+            "maxValue": 100.0,
+            "minStep": 1.0
+          },
+          {
+            "iid": 25,
+            "type": "00000034-0000-1000-8000-0026BB765291",
+            "format": "float",
+            "value": 36.0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "percentage",
+            "minValue": 20.0,
+            "maxValue": 50.0,
+            "minStep": 1.0
+          }
+        ]
+      },
+      {
+        "iid": 56,
+        "type": "00000085-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 28,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "Thermostat Motion",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 66,
+            "type": "00000022-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 67,
+            "type": "BFE61C70-4A40-11E6-BDF4-0800200C9A66",
+            "format": "int",
+            "value": 176,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "seconds",
+            "minValue": -1,
+            "maxValue": 86400,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 57,
+        "type": "00000086-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 29,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "Thermostat Occupancy",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 65,
+            "type": "00000071-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 68,
+            "type": "A8F798E0-4A40-11E6-BDF4-0800200C9A66",
+            "format": "int",
+            "value": 247,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "seconds",
+            "minValue": -1,
+            "maxValue": 86400,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 240,
+        "type": "00000129-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 242,
+            "type": "00000130-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 243,
+            "type": "00000131-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr",
+              "pw",
+              "wr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 244,
+            "type": "00000037-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "1.0",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      },
+      {
+        "iid": 512,
+        "type": "00000127-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 514,
+            "type": "00000115-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 515,
+            "type": "00000128-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      },
+      {
+        "iid": 769,
+        "type": "00000133-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "linked": [
+          512,
+          240
+        ],
+        "characteristics": [
+          {
+            "iid": 771,
+            "type": "00000132-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1
+          },
+          {
+            "iid": 772,
+            "type": "00000255-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 773,
+            "type": "00000256-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 774,
+            "type": "00000257-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 775,
+            "type": "00000258-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 777,
+            "type": "0000025A-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "1.0",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 778,
+            "type": "0000026B-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 784,
+        "type": "00000253-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "linked": [
+          800,
+          352
+        ],
+        "characteristics": [
+          {
+            "iid": 785,
+            "type": "00000254-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 786,
+            "type": "00000037-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "1.0",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 787,
+            "type": "000000E7-0000-1000-8000-0026BB765291",
+            "format": "uint32",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 788,
+            "type": "00000227-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 800,
+        "type": "0000026A-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 801,
+            "type": "000000E6-0000-1000-8000-0026BB765291",
+            "format": "uint32",
+            "value": 0,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 802,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "Siri",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 803,
+            "type": "000000B0-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 1024,
+        "type": "00000267-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 1026,
+            "type": "00000268-0000-1000-8000-0026BB765291",
+            "format": "uint32",
+            "value": 3,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 3,
+            "minStep": 1
+          },
+          {
+            "iid": 1027,
+            "type": "00000269-0000-1000-8000-0026BB765291",
+            "format": "uint32",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 15,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 352,
+        "type": "0000026A-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 353,
+            "type": "000000E6-0000-1000-8000-0026BB765291",
+            "format": "uint32",
+            "value": 1,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 354,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "Alexa",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 355,
+            "type": "000000B0-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 4144,
+        "type": "00000228-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "linked": [
+          129
+        ],
+        "characteristics": [
+          {
+            "iid": 4146,
+            "type": "000000E3-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "Thermostat",
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 4147,
+            "type": "000000E0-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 5,
+            "minStep": 1
+          },
+          {
+            "iid": 4148,
+            "type": "00000137-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 2,
+            "minStep": 1
+          },
+          {
+            "iid": 4150,
+            "type": "0000011A-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 4149,
+            "type": "00000119-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 50,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "percentage",
+            "minValue": 0,
+            "maxValue": 100,
+            "minStep": 1
+          },
+          {
+            "iid": 4151,
+            "type": "0000025B-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 129,
+        "type": "000000DA-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 130,
+            "type": "000000E5-0000-1000-8000-0026BB765291",
+            "format": "uint16",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 2,
+            "minStep": 1
+          },
+          {
+            "iid": 131,
+            "type": "000000E4-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr",
+              "pw",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      },
+      {
+        "iid": 16448,
+        "type": "0000022A-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 16450,
+            "type": "0000022B-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 1,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 16451,
+            "type": "0000022C-0000-1000-8000-0026BB765291",
+            "format": "uint32",
+            "value": 11,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 15,
+            "minStep": 1
+          },
+          {
+            "iid": 16452,
+            "type": "0000022D-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr",
+              "pw",
+              "ev",
+              "tw",
+              "wr"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      },
+      {
+        "iid": 2560,
+        "type": "00000239-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 2562,
+            "type": "0000023C-0000-1000-8000-0026BB765291",
+            "format": "data",
+            "value": "",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxDataLen": 0
+          }
+        ]
+      },
+      {
+        "iid": 208,
+        "type": "00000237-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 209,
+            "type": "00000238-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      },
+      {
+        "iid": 192,
+        "type": "00000270-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 193,
+            "type": "000000B0-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 194,
+            "type": "00000271-0000-1000-8000-0026BB765291",
+            "format": "tlv8",
+            "value": "",
+            "perms": [
+              "pr",
+              "pw"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 195,
+            "type": "00000272-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "aid": 4297551459,
+    "services": [
+      {
+        "iid": 1,
+        "type": "0000003E-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 2,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "SmartSensor",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 200
+          },
+          {
+            "iid": 3,
+            "type": "00000020-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "ecobee Inc.",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 30
+          },
+          {
+            "iid": 4,
+            "type": "00000030-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "000000000009",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 60
+          },
+          {
+            "iid": 5,
+            "type": "00000021-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "EBERS41",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 30
+          },
+          {
+            "iid": 8,
+            "type": "00000052-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "1.0.0",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 15
+          },
+          {
+            "iid": 6,
+            "type": "00000014-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "perms": [
+              "pw"
+            ]
+          }
+        ]
+      },
+      {
+        "iid": 192,
+        "type": "00000096-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 193,
+            "type": "0000008F-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 2,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 2,
+            "minStep": 1
+          },
+          {
+            "iid": 194,
+            "type": "00000068-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 100,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "percentage",
+            "minValue": 0,
+            "maxValue": 100,
+            "minStep": 1
+          },
+          {
+            "iid": 195,
+            "type": "00000079-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 196,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "SmartSensor",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 200
+          }
+        ]
+      },
+      {
+        "iid": 208,
+        "type": "0000008A-0000-1000-8000-0026BB765291",
+        "primary": true,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 209,
+            "type": "00000011-0000-1000-8000-0026BB765291",
+            "format": "float",
+            "value": 18.5,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "celsius",
+            "minValue": 0,
+            "maxValue": 100.0,
+            "minStep": 0.1
+          },
+          {
+            "iid": 210,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "SmartSensor Temperature",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 200
+          },
+          {
+            "iid": 211,
+            "type": "00000075-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 212,
+            "type": "00000079-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 57,
+        "type": "00000086-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 65,
+            "type": "00000071-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 29,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "SmartSensor Occupancy",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 200
+          },
+          {
+            "iid": 117,
+            "type": "00000075-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 116,
+            "type": "00000079-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 68,
+            "type": "A8F798E0-4A40-11E6-BDF4-0800200C9A66",
+            "format": "int",
+            "value": 4286,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "seconds",
+            "minValue": -1,
+            "maxValue": 86400,
+            "minStep": 1
+          }
+        ]
+      },
+      {
+        "iid": 56,
+        "type": "00000085-0000-1000-8000-0026BB765291",
+        "primary": false,
+        "hidden": false,
+        "characteristics": [
+          {
+            "iid": 66,
+            "type": "00000022-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 28,
+            "type": "00000023-0000-1000-8000-0026BB765291",
+            "format": "string",
+            "value": "SmartSensor Motion",
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "maxLen": 200
+          },
+          {
+            "iid": 101,
+            "type": "00000075-0000-1000-8000-0026BB765291",
+            "format": "bool",
+            "value": 1,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false
+          },
+          {
+            "iid": 100,
+            "type": "00000079-0000-1000-8000-0026BB765291",
+            "format": "uint8",
+            "value": 0,
+            "perms": [
+              "pr",
+              "ev"
+            ],
+            "ev": false,
+            "enc": false,
+            "minValue": 0,
+            "maxValue": 1,
+            "minStep": 1
+          },
+          {
+            "iid": 67,
+            "type": "BFE61C70-4A40-11E6-BDF4-0800200C9A66",
+            "format": "int",
+            "value": 4285,
+            "perms": [
+              "pr"
+            ],
+            "ev": false,
+            "enc": false,
+            "unit": "seconds",
+            "minValue": -1,
+            "maxValue": 86400,
+            "minStep": 1
+          }
+        ]
+      }
+    ]
+  }
+]

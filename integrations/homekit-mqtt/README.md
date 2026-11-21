@@ -107,9 +107,9 @@ docker compose restart homekit-mqtt
 ### Device names, limits and properties
 
 A device is named after its HomeKit accessory. To rename it, to narrow the
-setpoints a thermostat accepts over MQTT, or to leave properties out of its
-messages, create `data/devices.json`, keyed by accessory name or by
-`<alias>:<aid>`:
+setpoints a thermostat accepts over MQTT, to set the step of its setpoint in
+Home Assistant, or to leave properties out of its messages, create
+`data/devices.json`, keyed by accessory name or by `<alias>:<aid>`:
 
 ```json
 {
@@ -119,11 +119,13 @@ messages, create `data/devices.json`, keyed by accessory name or by
       "occupied_heating_setpoint": [18, 24],
       "occupied_cooling_setpoint": [22, 28]
     },
+    "step": 0.5,
     "exclude": ["temperature_display_units", "target_humidity", "fan_state"]
   }
 }
 ```
 
+Without `step`, Home Assistant uses the step of the accessory, often 0.1 °C.
 Names must not contain `/`, `+` or `#`. Restart the service after a change.
 
 ## MQTT topics
@@ -186,7 +188,9 @@ has `state_l1` to `state_l5`. A security system is a device of its own, named
 Every other characteristic is published under the snake_case name of its
 HomeKit type, for example `charging_state` or `audio_feedback`, and can be set
 when the accessory allows writing it. Identification and names of services
-are left out.
+are left out, and so are the services an accessory has for Apple's own use:
+Siri and other voice assistants built into it, audio and data streams to the
+Home hub, firmware updates, Wi-Fi setup, access codes and diagnostics.
 
 A thermostat's setpoints follow its mode, as Home Assistant shows a HomeKit
 thermostat: in `heat` and `cool` both setpoints are the target temperature,
@@ -202,8 +206,8 @@ and `max_cool_setpoint_limit`, from the accessory or narrowed in
 
 ## Home Assistant
 
-With discovery on, Home Assistant creates entities for thermostats (climate),
-lights, switches and outlets, fans, locks, window coverings, garage doors,
+With discovery on, Home Assistant creates entities for thermostats (climate,
+with their measured temperature and humidity also as sensors), lights, switches and outlets, fans, locks, window coverings, garage doors,
 security systems, sensors and binary sensors. Every property is on MQTT either
 way.
 
@@ -215,7 +219,8 @@ python -m unittest discover -s tests -t .
 ```
 
 The tests run the mapping, Home Assistant discovery and the service against
-accessory descriptions of real devices (Ecobee, Meross, Aqara, Schlage, Velux,
+accessory descriptions of real devices (Ecobee, among them a Smart Thermostat
+Premium with a SmartSensor, Meross, Aqara, Schlage, Velux,
 Eve, HAA) with the `aiohomekit` test controller.
 
 ## License

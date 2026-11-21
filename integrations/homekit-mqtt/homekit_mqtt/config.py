@@ -85,7 +85,7 @@ def _topic(name: str, value: str) -> str:
 
 
 def load_devices(path: Path) -> dict[str, DeviceOptions]:
-    """Read the optional devices file: names, setpoint limits and left-out properties per accessory."""
+    """Read the optional devices file: names, setpoint limits and step, and left-out properties per accessory."""
     if not path.exists():
         return {}
     try:
@@ -119,10 +119,20 @@ def load_devices(path: Path) -> dict[str, DeviceOptions]:
         exclude = entry.get("exclude") or []
         if not isinstance(exclude, list) or not all(isinstance(n, str) for n in exclude):
             raise ConfigError(f"{path}: {key!r} exclude must be a list of property names")
-        unknown = set(entry) - {"name", "limits", "exclude"}
+        step = entry.get("step")
+        if step is not None and (
+            not isinstance(step, (int, float)) or isinstance(step, bool) or step <= 0
+        ):
+            raise ConfigError(f"{path}: {key!r} step must be a positive number")
+        unknown = set(entry) - {"name", "limits", "exclude", "step"}
         if unknown:
             raise ConfigError(f"{path}: {key!r} has unknown keys: {', '.join(sorted(unknown))}")
-        devices[key] = DeviceOptions(name=name, limits=limits, exclude=frozenset(exclude))
+        devices[key] = DeviceOptions(
+            name=name,
+            limits=limits,
+            exclude=frozenset(exclude),
+            step=float(step) if step is not None else None,
+        )
     return devices
 
 

@@ -35,6 +35,20 @@ SKIPPED_SERVICES = {
     S.ACCESSORY_INFORMATION,
     S.PROTOCOL_INFORMATION,
     S.SERVICE_LABEL,
+    # Services for Apple's own use of the accessory: Siri and other voice assistants
+    # built into it, audio and data streams to the Home hub, firmware updates,
+    # Wi-Fi setup, access codes and diagnostics.
+    S.SIRI,
+    S.SIRI_ENDPOINT,
+    S.ASSISTANT,
+    S.AUDIO_STREAM_MANAGEMENT,
+    S.DATA_STREAM_TRANSPORT_MANAGEMENT,
+    S.ASSET_UPDATE,
+    S.ACCESS_CONTROL,
+    S.WI_FI_TRANSPORT,
+    S.ACCESSORY_RUNTIME_INFORMATION,
+    S.DIAGNOSTICS,
+    S.ACCESSORY_METRICS,
 }
 
 # Characteristics that only name or identify a service.
@@ -329,6 +343,7 @@ class Thermostat:
     fan_current: Characteristic | None = None
     heating_limits: tuple[float, float] | None = None
     cooling_limits: tuple[float, float] | None = None
+    step: float | None = None
 
     def characteristics(self) -> list[Characteristic]:
         chars = (self.mode, self.target, self.heating, self.cooling, self.fan_current)
@@ -419,6 +434,8 @@ class DeviceOptions:
     name: str | None = None
     limits: dict[str, tuple[float, float]] = field(default_factory=dict)
     exclude: frozenset[str] = frozenset()
+    # Setpoint step of a thermostat in Home Assistant; None keeps the step of the accessory.
+    step: float | None = None
 
 
 def _apple(char_type: str) -> bool:
@@ -544,6 +561,7 @@ def build_device(
             kept.append(prop)
         props = kept
         if thermostat is not None and device.thermostat is None:
+            thermostat.step = options.step
             device.thermostat = thermostat
         if props or thermostat is not None:
             per_service.append((service, props))
